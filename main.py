@@ -1,16 +1,28 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from ui.menu import Menu
+from ui.strings import STRINGS
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+def main():
+    aktif_dil = "tr"  # Varsayılan dil
+
+    while True:
+        Menu.misafir_paneli_ciz(aktif_dil)
+        secim = input(STRINGS[aktif_dil]["choice"]).upper()
+
+        if secim == "1":
+            Menu.mesaj_goster("Piyasalar cok yakinda burada olacak...")
+            input("\nDevam...")
+        elif secim == "4":
+            aktif_dil = "en" if aktif_dil == "tr" else "tr"
+        elif secim == "Q":
+            print(STRINGS[aktif_dil]["logout"])
+            break
+        elif secim == "L":
+            Menu.mesaj_goster("Giris ekrani hazirlaniyor...")
+            input("\nDevam...")
+        else:
+            input(STRINGS[aktif_dil]["invalid"])
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    main()

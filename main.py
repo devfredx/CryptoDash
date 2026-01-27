@@ -1,27 +1,49 @@
 from ui.menu import Menu
 from ui.strings import STRINGS
+from repository.user_repository import UserRepository
+from service.auth_service import AuthService
 
 
 def main():
-    aktif_dil = "tr"  # Varsayılan dil
+    # Initialize the architecture layers
+    user_repo = UserRepository()
+    auth_service = AuthService(user_repo)
+
+    # Application state
+    current_lang = "tr"
 
     while True:
-        Menu.misafir_paneli_ciz(aktif_dil)
-        secim = input(STRINGS[aktif_dil]["choice"]).upper()
+        s = STRINGS[current_lang]
+        Menu.draw_guest_dashboard(current_lang)
+        choice = input(s["choice"]).upper()
 
-        if secim == "1":
-            Menu.mesaj_goster("Piyasalar cok yakinda burada olacak...")
-            input("\nDevam...")
-        elif secim == "4":
-            aktif_dil = "en" if aktif_dil == "tr" else "tr"
-        elif secim == "Q":
-            print(STRINGS[aktif_dil]["logout"])
+        if choice == "1":
+            Menu.show_message("Market details coming soon...")
+            input("\nPress Enter...")
+
+        elif choice == "4":
+            current_lang = "en" if current_lang == "tr" else "tr"
+
+        elif choice == "R":
+            Menu.clear_screen()
+            print(f"--- {s['m_register'].upper()} ---")
+            u_name = input(f"{s['choice']} (Username): ")
+            p_word = input(f"{s['choice']} (Password): ")
+
+            success, message = auth_service.register(u_name, p_word)
+
+            if success:
+                Menu.show_message(f"{message} (User: {u_name})")
+            else:
+                Menu.show_message(f"ERROR: {message}")
+            input("\nPress Enter...")
+
+        elif choice == "Q":
+            print(s["logout"])
             break
-        elif secim == "L":
-            Menu.mesaj_goster("Giris ekrani hazirlaniyor...")
-            input("\nDevam...")
+
         else:
-            input(STRINGS[aktif_dil]["invalid"])
+            input(s["invalid"])
 
 
 if __name__ == "__main__":

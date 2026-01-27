@@ -2,15 +2,18 @@ from models.user import User
 
 
 class AuthService:
-    def __init__(self, user_repo):
-        self.user_repo = user_repo
+    """Business logic for authentication and registration."""
+
+    def __init__(self, user_repository):
+        self.user_repository = user_repository
 
     def register(self, username, password):
-        # Önce bu kullanıcı adı alınmış mı kontrol et
-        if self.user_repo.find_by_username(username):
-            return False, "Bu kullanici adi zaten alinmis!"
+        """Processes user registration logic."""
+        # Check if the user already exists
+        if self.user_repository.find_by_username(username):
+            return False, "This username is already taken!"
 
-        # Yeni kullanıcı oluştur ve depoya ekle
+        # Create and save the new user
         new_user = User(username, password)
-        self.user_repo.add_user(new_user)
-        return True, "Kayit basarili!"
+        self.user_repository.add_user(new_user)
+        return True, "Registration successful!"

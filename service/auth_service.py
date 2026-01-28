@@ -17,3 +17,11 @@ class AuthService:
         new_user = User(username, password)
         self.user_repository.add_user(new_user)
         return True, "Registration successful!"
+
+    def login(self, username, password):
+        """Authenticates a user and returns the user object if successful."""
+        user = self.user_repository.find_by_username(username)
+
+        if user and user.password == password:
+            return user
+        return None

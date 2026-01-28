@@ -12,7 +12,14 @@ STRINGS = {
         "m_exit": "Q. Uygulamadan Cik",
         "choice": "Seciminiz: ",
         "invalid": "Gecersiz secim! Devam etmek icin Enter...",
-        "logout": "Gule gule! CryptoDash'i tercih ettiginiz icin tesekkurler."
+        "logout": "Gule gule! CryptoDash'i tercih ettiginiz icin tesekkurler.",
+        "m_trade": "1. Kolay Al-Sat",
+        "m_wallet": "2. Cuzdan Detaylari",
+        "m_history": "3. Islem Gecmisi",
+        "m_settings": "4. Hesap Ayarlari",
+        "m_logout": "O. Guvenli Cikis",
+        "login_success": "Giris basarili! Yonlendiriliyorsunuz...",
+        "login_fail": "Hatali kullanici adi veya sifre!",
     },
     "en": {
         "app_title": "CRYPTODASH - WELCOME TO CRYPTO WORLD (V1.0)",
@@ -27,6 +34,13 @@ STRINGS = {
         "m_exit": "Q. Exit Application",
         "choice": "Your Choice: ",
         "invalid": "Invalid choice! Press Enter to continue...",
-        "logout": "Goodbye! Thank you for using CryptoDash."
+        "logout": "Goodbye! Thank you for using CryptoDash.",
+        "m_trade": "1. Easy Trade",
+        "m_wallet": "2. Wallet Details",
+        "m_history": "3. Transaction History",
+        "m_settings": "4. Account Settings",
+        "m_logout": "O. Logout",
+        "login_success": "Login successful! Redirecting...",
+        "login_fail": "Invalid username or password!",
     }
 }

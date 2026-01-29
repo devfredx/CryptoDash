@@ -50,3 +50,16 @@ class Menu:
         print(f" {s['m_news']:<34} |  {s['m_settings']}")
         print(f" {s['m_support']:<34} |  {s['m_logout']}")
         print("-" * 35 + " | " + "-" * 36)
+
+    @staticmethod
+    def show_market_table(assets):
+        """Displays assets in a formatted table."""
+        Menu.clear_screen()
+        print("=" * 40)
+        print(f" {'SYMBOL':<10} | {'PRICE (USDT)':<15}")
+        print("-" * 40)
+
+        for asset in assets:
+            print(f" {asset.symbol:<10} | ${asset.current_price:<15,.2f}")
+
+        print("=" * 40)

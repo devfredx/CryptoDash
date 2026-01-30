@@ -63,3 +63,31 @@ class Menu:
             print(f" {asset.symbol:<10} | ${asset.current_price:<15,.2f}")
 
         print("=" * 40)
+
+    @staticmethod
+    def show_wallet_details(summary):
+        """Displays detailed wallet portfolio."""
+        Menu.clear_screen()
+        print("=" * 50)
+        print(f"            MY WALLET SUMMARY")
+        print("=" * 50)
+
+        # 1. Nakit Bakiye
+        print(f" CASH BALANCE   : ${summary['balance_usdt']:,.2f}")
+
+        # 2. Varlıklar
+        print("-" * 50)
+        print(f" {'ASSET':<10} {'AMOUNT':<10} {'PRICE':<12} {'VALUE':<12}")
+        print("-" * 50)
+
+        if not summary['assets']:
+            print("  No crypto assets yet.")
+        else:
+            for item in summary['assets']:
+                print(
+                    f" {item['symbol']:<10} {item['amount']:<10.4f} ${item['price']:<11,.0f} ${item['total_value']:<11,.2f}")
+
+        # 3. Toplam Servet
+        print("-" * 50)
+        print(f" TOTAL WEALTH   : ${summary['total_wealth']:,.2f}")
+        print("=" * 50)

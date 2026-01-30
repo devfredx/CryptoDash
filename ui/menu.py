@@ -91,3 +91,15 @@ class Menu:
         print("-" * 50)
         print(f" TOTAL WEALTH   : ${summary['total_wealth']:,.2f}")
         print("=" * 50)
+
+    @staticmethod
+    def draw_trade_menu():
+        """Displays options for buying or selling."""
+        Menu.clear_screen()
+        print("=" * 40)
+        print("          TRADE OPERATIONS")
+        print("=" * 40)
+        print(" [B] BUY COIN  (USDT -> COIN)")
+        print(" [S] SELL COIN (COIN -> USDT)")
+        print(" [X] BACK TO MENU")
+        print("-" * 40) 

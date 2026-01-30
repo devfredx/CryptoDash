@@ -2,27 +2,37 @@ from ui.menu import Menu
 from ui.strings import STRINGS
 from repository.user_repository import UserRepository
 from service.auth_service import AuthService
+from service.market_service import MarketService
+from service.wallet_service import WalletService  # <-- YENİ IMPORT
 
 
 def main():
     # 1. Initialize Architecture
     user_repo = UserRepository()
     auth_service = AuthService(user_repo)
+    market_service = MarketService()
+
+    # WalletService, fiyatları bilmek için market_service'i kullanır
+    wallet_service = WalletService(market_service)  # <-- YENİ BAŞLATMA
 
     # 2. Application State
     current_lang = "tr"
-    current_session = None  # None = Misafir, User Object = Üye Giriş Yaptı
+    current_session = None
 
     while True:
         s = STRINGS[current_lang]
 
-        # --- DURUM 1: MİSAFİR MODU (Giriş Yapılmamış) ---
+        # --- DURUM 1: MİSAFİR MODU ---
         if current_session is None:
             Menu.draw_guest_dashboard(current_lang)
             choice = input(s["choice"]).upper()
 
-            if choice == "R":
-                # Register Logic
+            if choice == "1":
+                all_assets = market_service.get_all_assets()
+                Menu.show_market_table(all_assets)
+                input("\nPress Enter to return...")
+
+            elif choice == "R":
                 Menu.clear_screen()
                 print(f"--- {s['m_register'].upper()} ---")
                 u_name = input(f"{s['choice']} (Username): ")
@@ -32,17 +42,13 @@ def main():
                 input("\nPress Enter...")
 
             elif choice == "L":
-                # LOGIN LOGIC (BURASI EKLENDİ)
                 Menu.clear_screen()
                 print(f"--- {s['m_login'].upper()} ---")
                 u_name = input(f"{s['choice']} (Username): ")
                 p_word = input(f"{s['choice']} (Password): ")
-
-                # Servise sor: Bu bilgiler doğru mu?
                 user = auth_service.login(u_name, p_word)
-
                 if user:
-                    current_session = user  # OTURUM AÇILDI!
+                    current_session = user
                     Menu.show_message(s["login_success"])
                 else:
                     Menu.show_message(s["login_fail"])
@@ -57,19 +63,26 @@ def main():
                 Menu.show_message("Please login or register first.")
                 input("\nPress Enter...")
 
-        # --- DURUM 2: ÜYE MODU (Giriş Yapılmış) ---
+        # --- DURUM 2: ÜYE MODU ---
         else:
-            # Artık Üye Panelini çiziyoruz
             Menu.draw_member_dashboard(current_lang, current_session)
             choice = input(s["choice"]).upper()
 
-            if choice == "O":  # Logout
-                current_session = None  # Oturumu kapat, Misafir moda dön
-                Menu.show_message(s["logout"])
-                input("\nPress Enter...")
+            if choice == "1":
+                all_assets = market_service.get_all_assets()
+                Menu.show_market_table(all_assets)
+                input("\nPress Enter to return...")
 
-            elif choice == "2":  # Wallet (Örnek)
-                Menu.show_message(f"Wallet Balance: {current_session.balance} USDT")
+            elif choice == "2":  # <-- CUZDAN GORUNTULEME (Wallet View)
+                # Cüzdan detaylarını hesapla
+                summary = wallet_service.get_portfolio_summary(current_session)
+                # Ekrana bas
+                Menu.show_wallet_details(summary)
+                input("\nPress Enter to return...")
+
+            elif choice == "O":
+                current_session = None
+                Menu.show_message(s["logout"])
                 input("\nPress Enter...")
 
             else:

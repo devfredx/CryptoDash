@@ -102,6 +102,19 @@ def main():
 
                 input("\nPress Enter to return...")
 
+
+            elif choice == "4":  # Haberler (Sadece yer tutucu)
+
+                Menu.show_message("News feed connecting...")
+
+                input("\nPress Enter...")
+
+
+            elif choice == "5":  # <-- HISTORY (GEÇMİŞ)
+
+                Menu.show_history(current_session.history)
+
+                input("\nPress Enter to return...")
             elif choice == "O":
                 current_session = None
                 Menu.show_message(s["logout"])

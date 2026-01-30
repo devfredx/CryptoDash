@@ -37,18 +37,28 @@ class Menu:
         s = STRINGS[language]
         Menu.clear_screen()
 
+        # Header with User Info
         print("=" * 74)
         header_text = f"   CryptoDash PRO | {user.username.upper()} | {user.balance} USDT"
         print(f"{header_text:<74}")
         print("=" * 74)
 
+        # Member Menu Options (DÜZELTİLMİŞ SIRALAMA)
         print(f" {s['menu_header_left']:<34} |  {s['menu_header_right']}")
         print("-" * 35 + " | " + "-" * 36)
 
-        print(f" {s['m_trade']:<34} |  {s['m_wallet']}")
-        print(f" {s['m_markets']:<34} |  {s['m_history']}")
-        print(f" {s['m_news']:<34} |  {s['m_settings']}")
+        # Satır 1: Piyasalar (1) ve Cüzdan (2)
+        print(f" {s['m_markets']:<34} |  {s['m_wallet']}")
+
+        # Satır 2: Al-Sat (3) ve Haberler (4)
+        print(f" {s['m_trade']:<34} |  {s['m_news']}")
+
+        # Satır 3: Geçmiş (5) ve Ayarlar (6)
+        print(f" {s['m_history']:<34} |  {s['m_settings']}")
+
+        # Satır 4: Destek (D) ve Çıkış (O)
         print(f" {s['m_support']:<34} |  {s['m_logout']}")
+
         print("-" * 35 + " | " + "-" * 36)
 
     @staticmethod
@@ -102,4 +112,24 @@ class Menu:
         print(" [B] BUY COIN  (USDT -> COIN)")
         print(" [S] SELL COIN (COIN -> USDT)")
         print(" [X] BACK TO MENU")
-        print("-" * 40) 
+        print("-" * 40)
+
+    @staticmethod
+    def show_history(history):
+        """Displays transaction history table."""
+        Menu.clear_screen()
+        print("=" * 65)
+        print("          TRANSACTION HISTORY")
+        print("=" * 65)
+        print(f" {'DATE':<18} {'TYPE':<6} {'SYMBOL':<8} {'AMOUNT':<10} {'PRICE':<10}")
+        print("-" * 65)
+
+        if not history:
+            print("  No transactions found.")
+        else:
+            # En son işlem en üstte görünsün diye ters çeviriyoruz (reversed)
+            for item in reversed(history):
+                print(
+                    f" {item['date']:<18} {item['type']:<6} {item['symbol']:<8} {item['amount']:<10.4f} ${item['price']:<10,.0f}")
+
+        print("=" * 65)

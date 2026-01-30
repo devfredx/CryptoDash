@@ -3,7 +3,8 @@ from ui.strings import STRINGS
 from repository.user_repository import UserRepository
 from service.auth_service import AuthService
 from service.market_service import MarketService
-from service.wallet_service import WalletService  # <-- YENİ IMPORT
+from service.wallet_service import WalletService
+from service.trade_service import TradeService  # <-- YENİ IMPORT
 
 
 def main():
@@ -11,9 +12,8 @@ def main():
     user_repo = UserRepository()
     auth_service = AuthService(user_repo)
     market_service = MarketService()
-
-    # WalletService, fiyatları bilmek için market_service'i kullanır
-    wallet_service = WalletService(market_service)  # <-- YENİ BAŞLATMA
+    wallet_service = WalletService(market_service)
+    trade_service = TradeService(market_service, user_repo)  # <-- YENİ SERVİS
 
     # 2. Application State
     current_lang = "tr"
@@ -73,11 +73,33 @@ def main():
                 Menu.show_market_table(all_assets)
                 input("\nPress Enter to return...")
 
-            elif choice == "2":  # <-- CUZDAN GORUNTULEME (Wallet View)
-                # Cüzdan detaylarını hesapla
+            elif choice == "2":
                 summary = wallet_service.get_portfolio_summary(current_session)
-                # Ekrana bas
                 Menu.show_wallet_details(summary)
+                input("\nPress Enter to return...")
+
+            elif choice == "3":  # <-- TRADE LOGIC (AL-SAT İŞLEMİ)
+                Menu.draw_trade_menu()
+                sub_choice = input(s["choice"]).upper()
+
+                if sub_choice == "B":  # BUY
+                    symbol = input("Coin Symbol (e.g. BTC): ").upper()
+                    try:
+                        amount = float(input("Amount in USDT (e.g. 1000): "))
+                        success, msg = trade_service.buy_asset(current_session, symbol, amount)
+                        Menu.show_message(msg)
+                    except ValueError:
+                        Menu.show_message("Invalid number format!")
+
+                elif sub_choice == "S":  # SELL
+                    symbol = input("Coin Symbol (e.g. BTC): ").upper()
+                    try:
+                        amount = float(input("Amount to Sell (e.g. 0.5): "))
+                        success, msg = trade_service.sell_asset(current_session, symbol, amount)
+                        Menu.show_message(msg)
+                    except ValueError:
+                        Menu.show_message("Invalid number format!")
+
                 input("\nPress Enter to return...")
 
             elif choice == "O":

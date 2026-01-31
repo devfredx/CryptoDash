@@ -6,7 +6,7 @@ from service.market_service import MarketService
 from service.wallet_service import WalletService
 from service.trade_service import TradeService
 from service.news_service import NewsService
-
+from service.support_service import SupportService # <-- YENİ IMPORT
 
 def main():
     # 1. Initialize Architecture
@@ -16,6 +16,7 @@ def main():
     wallet_service = WalletService(market_service)
     trade_service = TradeService(market_service, user_repo)
     news_service = NewsService()
+    support_service = SupportService() # <-- YENİ SERVİS
 
     # 2. Application State
     current_lang = "tr"
@@ -34,10 +35,14 @@ def main():
                 Menu.show_market_table(all_assets)
                 input("\nPress Enter to return...")
 
-            elif choice == "4":  # <-- HABERLER (DİL DESTEKLİ)
-                # Buraya current_lang parametresini ekledik
+            elif choice == "4":
                 news = news_service.get_latest_news(current_lang)
                 Menu.show_news(news)
+                input("\nPress Enter to return...")
+
+            elif choice == "D": # <-- MİSAFİR DESTEK
+                content = support_service.get_support_content(current_lang)
+                Menu.show_support_page(content)
                 input("\nPress Enter to return...")
 
             elif choice == "R":
@@ -62,7 +67,7 @@ def main():
                     Menu.show_message(s["login_fail"])
                 input("\nPress Enter...")
 
-            elif choice == "9":  # <-- DİL DEĞİŞTİRME
+            elif choice == "9":
                 current_lang = "en" if current_lang == "tr" else "tr"
 
             elif choice == "Q":
@@ -89,8 +94,7 @@ def main():
             elif choice == "3":
                 Menu.draw_trade_menu()
                 sub_choice = input(s["choice"]).upper()
-
-                if sub_choice == "B":  # BUY
+                if sub_choice == "B":
                     symbol = input("Coin Symbol (e.g. BTC): ").upper()
                     try:
                         amount = float(input("Amount in USDT: "))
@@ -98,8 +102,7 @@ def main():
                         Menu.show_message(msg)
                     except ValueError:
                         Menu.show_message("Invalid number format!")
-
-                elif sub_choice == "S":  # SELL
+                elif sub_choice == "S":
                     symbol = input("Coin Symbol (e.g. BTC): ").upper()
                     try:
                         amount = float(input("Amount to Sell: "))
@@ -107,17 +110,20 @@ def main():
                         Menu.show_message(msg)
                     except ValueError:
                         Menu.show_message("Invalid number format!")
-
                 input("\nPress Enter to return...")
 
-            elif choice == "4":  # <-- HABERLER (DİL DESTEKLİ)
-                # Buraya da current_lang parametresini ekledik
+            elif choice == "4":
                 news = news_service.get_latest_news(current_lang)
                 Menu.show_news(news)
                 input("\nPress Enter to return...")
 
             elif choice == "5":
                 Menu.show_history(current_session.history)
+                input("\nPress Enter to return...")
+
+            elif choice == "D": # <-- ÜYE DESTEK
+                content = support_service.get_support_content(current_lang)
+                Menu.show_support_page(content)
                 input("\nPress Enter to return...")
 
             elif choice == "O":
@@ -128,7 +134,6 @@ def main():
             else:
                 Menu.show_message("Feature coming soon...")
                 input("\nPress Enter...")
-
 
 if __name__ == "__main__":
     main()

@@ -155,3 +155,23 @@ class Menu:
             print("-" * 74)
 
         print("=" * 74)
+
+    @staticmethod
+    def show_support_page(support_data):
+        """Displays FAQs and contact information."""
+        Menu.clear_screen()
+        print("=" * 74)
+        print("                SUPPORT & FREQUENTLY ASKED QUESTIONS")
+        print("=" * 74)
+
+        # SSS Bölümü
+        for item in support_data["faqs"]:
+            print(f" Q: {item['q']}")
+            print(f" A: {item['a']}")
+            print("-" * 74)
+
+        # İletişim Bölümü
+        print(f"\n >>> CONTACT US")
+        print(f" Email: {support_data['contact']['email']}")
+        print(f" Phone: {support_data['contact']['phone']}")
+        print("=" * 74)

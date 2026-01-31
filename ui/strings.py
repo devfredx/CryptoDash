@@ -5,29 +5,27 @@ STRINGS = {
         "menu_header_left": " ISLEMLER",
         "menu_header_right": "HESAP ISLEMLERI",
 
-        # --- MENÜ SEÇENEKLERİ (MİSAFİR & ÜYE) ---
+        # --- MENÜ SEÇENEKLERİ ---
         "m_markets": "1. Piyasalari Izle",
         "m_wallet": "2. Cuzdan Detaylari",
         "m_trade": "3. Kolay Al-Sat",
-        "m_news": "4. Kripto Haberleri",
+        "m_news": "4. Kripto Haberleri",  # Hem misafir hem üye için 4
         "m_history": "5. Islem Gecmisi",
         "m_settings": "6. Hesap Ayarlari",
 
         "m_support": "D. Destek & SSS",
-        "m_lang": "4. Dil Degistir (TR/EN)",  # Misafir menüsünde 4 numara
+        "m_lang": "9. Dil Degistir (TR/EN)",  # ÇAKIŞMA DÜZELTİLDİ: 4 -> 9
 
-        # --- GİRİŞ / ÇIKIŞ İŞLEMLERİ ---
+        # --- GİRİŞ / ÇIKIŞ ---
         "m_login": "L. Giris Yap (Login)",
         "m_register": "R. Kayit Ol (Register)",
         "m_exit": "Q. Uygulamadan Cik",
         "m_logout": "O. Guvenli Cikis",
 
-        # --- ETKİLEŞİM MESAJLARI ---
+        # --- MESAJLAR ---
         "choice": "Seciminiz: ",
         "invalid": "Gecersiz secim! Devam etmek icin Enter...",
         "logout": "Gule gule! CryptoDash'i tercih ettiginiz icin tesekkurler.",
-
-        # --- GİRİŞ DURUMLARI ---
         "login_success": "Giris basarili! Yonlendiriliyorsunuz...",
         "login_fail": "Hatali kullanici adi veya sifre!",
         "member_welcome": "HOS GELDIN, "
@@ -43,25 +41,23 @@ STRINGS = {
         "m_markets": "1. Watch Markets",
         "m_wallet": "2. Wallet Details",
         "m_trade": "3. Easy Trade",
-        "m_news": "4. Crypto News",
+        "m_news": "4. Crypto News",  # Both guest and member
         "m_history": "5. Transaction History",
         "m_settings": "6. Account Settings",
 
         "m_support": "D. Support & FAQ",
-        "m_lang": "4. Change Language (TR/EN)",
+        "m_lang": "9. Change Language (TR/EN)",  # FIXED CONFLICT: 4 -> 9
 
-        # --- AUTH OPERATIONS ---
+        # --- AUTH ---
         "m_login": "L. Login",
         "m_register": "R. Register",
         "m_exit": "Q. Exit Application",
         "m_logout": "O. Logout",
 
-        # --- INTERACTION MESSAGES ---
+        # --- MESSAGES ---
         "choice": "Your Choice: ",
         "invalid": "Invalid choice! Press Enter to continue...",
         "logout": "Goodbye! Thank you for using CryptoDash.",
-
-        # --- LOGIN STATES ---
         "login_success": "Login successful! Redirecting...",
         "login_fail": "Invalid username or password!",
         "member_welcome": "WELCOME, "

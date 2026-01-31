@@ -10,20 +10,27 @@ class Menu:
 
     @staticmethod
     def draw_guest_dashboard(language):
-        """Renders the dashboard for unauthenticated users."""
+        """Renders the main layout for guest users."""
         s = STRINGS[language]
         Menu.clear_screen()
 
-        # UI Frame
         print("=" * 74)
         print(f"   {s['app_title']}")
         print("=" * 74)
         print(f" {s['menu_header_left']:<34} |  {s['menu_header_right']}")
         print("-" * 35 + " | " + "-" * 36)
+
+        # Sol: Piyasalar (1), Sağ: Giriş (L)
         print(f" {s['m_markets']:<34} |  {s['m_login']}")
+
+        # Sol: Haberler (4), Sağ: Kayıt (R)
         print(f" {s['m_news']:<34} |  {s['m_register']}")
-        print(f" {s['m_support']:<34} |  ")
-        print(f" {s['m_lang']:<34} |  {s['m_exit']}")
+
+        # Sol: Destek (D), Sağ: Çıkış (Q)
+        print(f" {s['m_support']:<34} |  {s['m_exit']}")
+
+        # Sol: Dil (9), Sağ: Boş
+        print(f" {s['m_lang']:<34} |  ")
         print("-" * 35 + " | " + "-" * 36)
 
     @staticmethod
@@ -133,3 +140,18 @@ class Menu:
                     f" {item['date']:<18} {item['type']:<6} {item['symbol']:<8} {item['amount']:<10.4f} ${item['price']:<10,.0f}")
 
         print("=" * 65)
+
+    @staticmethod
+    def show_news(news_list):
+        """Displays news articles in a list."""
+        Menu.clear_screen()
+        print("=" * 74)
+        print("          LATEST CRYPTO NEWS & HEADLINES")
+        print("=" * 74)
+
+        for item in news_list:
+            print(f" [{item['date']}] ({item['source']})")
+            print(f" -> {item['title']}")
+            print("-" * 74)
+
+        print("=" * 74)

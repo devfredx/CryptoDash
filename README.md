@@ -7,14 +7,12 @@ CryptoDash is a robust, console-based cryptocurrency trading simulator built wit
 
 ## ✨ Key Features (v1.0)
 - **🔐 Secure Authentication:** User registration and login system with persistent data storage.
-- **💹 Market Simulation:** Real-time tracking of popular crypto assets (BTC, ETH, SOL, etc.).
+- **💹 Market Simulation:** Tracking of popular crypto assets (BTC, ETH, SOL, etc.) with **fixed simulation prices**.
 - **💰 Dynamic Wallet:** Automated portfolio value calculation based on current market prices.
 - **🔄 Trade Engine:** Seamless "Buy" and "Sell" logic with instant balance updates.
 - **📊 Transaction History:** Detailed logs for every trade, including dates, prices, and amounts.
 - **🌍 Multilingual Support:** Fully functional interface in both **Turkish** and **English**.
 - **📰 Integrated News & Support:** Live-feed simulation for crypto headlines and a dedicated FAQ/Support section.
-- **💾 Data Persistence:** All user data, balances, and histories are securely saved and loaded from `users.json`.
-
 ---
 
 ## 🛠 Tech Stack

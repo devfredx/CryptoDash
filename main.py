@@ -1,3 +1,7 @@
+# main.py
+
+import time
+# legacy imports for services
 from ui.menu import Menu
 from ui.strings import STRINGS
 from repository.user_repository import UserRepository
@@ -6,134 +10,160 @@ from service.market_service import MarketService
 from service.wallet_service import WalletService
 from service.trade_service import TradeService
 from service.news_service import NewsService
-from service.support_service import SupportService # <-- YENİ IMPORT
+from service.support_service import SupportService
+
+# v2 imports
+from ui.menu_map import get_guest_menu_structure
+from ui.menu_v2 import MenuV2
+
 
 def main():
-    # 1. Initialize Architecture
+    # initialize services
     user_repo = UserRepository()
     auth_service = AuthService(user_repo)
     market_service = MarketService()
     wallet_service = WalletService(market_service)
     trade_service = TradeService(market_service, user_repo)
     news_service = NewsService()
-    support_service = SupportService() # <-- YENİ SERVİS
+    support_service = SupportService()
 
-    # 2. Application State
-    current_lang = "tr"
+    # application state
+    # default language is english
+    current_lang = "en"
     current_session = None
 
+    # navigation state
+    nav_state = {
+        "mode": "dashboard",
+        "current_key": None
+    }
+
     while True:
-        s = STRINGS[current_lang]
+        # load strings for legacy support
+        s = STRINGS.get(current_lang, STRINGS["en"])
 
-        # --- DURUM 1: MİSAFİR MODU ---
+        # load v2 menu structure based on current language
+        guest_mega_menu, guest_sub_menus = get_guest_menu_structure(current_lang)
+
+        # check guest mode
         if current_session is None:
-            Menu.draw_guest_dashboard(current_lang)
-            choice = input(s["choice"]).upper()
 
-            if choice == "1":
-                all_assets = market_service.get_all_assets()
-                Menu.show_market_table(all_assets)
-                input("\nPress Enter to return...")
+            # dashboard view
+            if nav_state["mode"] == "dashboard":
+                MenuV2.draw_mega_dashboard(guest_mega_menu)
+                choice = input(" 👉 Select (1-6) or Q: ").upper().strip()
 
-            elif choice == "4":
-                news = news_service.get_latest_news(current_lang)
-                Menu.show_news(news)
-                input("\nPress Enter to return...")
+                if choice in guest_mega_menu:
+                    target_key = guest_mega_menu[choice]["goto"]
+                    nav_state["current_key"] = target_key
+                    nav_state["mode"] = "submenu"
 
-            elif choice == "D": # <-- MİSAFİR DESTEK
-                content = support_service.get_support_content(current_lang)
-                Menu.show_support_page(content)
-                input("\nPress Enter to return...")
-
-            elif choice == "R":
-                Menu.clear_screen()
-                print(f"--- {s['m_register'].upper()} ---")
-                u_name = input(f"{s['choice']} (Username): ")
-                p_word = input(f"{s['choice']} (Password): ")
-                success, msg = auth_service.register(u_name, p_word)
-                Menu.show_message(msg)
-                input("\nPress Enter...")
-
-            elif choice == "L":
-                Menu.clear_screen()
-                print(f"--- {s['m_login'].upper()} ---")
-                u_name = input(f"{s['choice']} (Username): ")
-                p_word = input(f"{s['choice']} (Password): ")
-                user = auth_service.login(u_name, p_word)
-                if user:
-                    current_session = user
-                    Menu.show_message(s["login_success"])
+                elif choice == "Q":
+                    print("Goodbye")
+                    break
                 else:
-                    Menu.show_message(s["login_fail"])
-                input("\nPress Enter...")
+                    # invalid input refresh
+                    pass
 
-            elif choice == "9":
-                current_lang = "en" if current_lang == "tr" else "tr"
+            # submenu view
+            elif nav_state["mode"] == "submenu":
+                current_key = nav_state["current_key"]
+                menu_data = guest_sub_menus[current_key]
 
-            elif choice == "Q":
-                print(s["logout"])
-                break
-            else:
-                Menu.show_message(s["invalid"])
+                # build breadcrumb path
+                path = ["HOME", menu_data["title"]]
 
-        # --- DURUM 2: ÜYE MODU ---
+                MenuV2.draw_submenu(menu_data, path)
+                sub_choice = input(" 👉 Select: ").upper().strip()
+
+                if sub_choice in menu_data["options"]:
+                    selected_option = menu_data["options"][sub_choice]
+                    action = selected_option.get("action")
+
+                    # handle actions
+
+                    if action == "GO_BACK":
+                        nav_state["mode"] = "dashboard"
+                        nav_state["current_key"] = None
+
+                    elif action == "lang":
+                        # toggle language en to tr or tr to en
+                        current_lang = "tr" if current_lang == "en" else "en"
+                        print(f"Language changed to {current_lang.upper()}")
+                        time.sleep(0.5)
+                        # return to dashboard to see changes
+                        nav_state["mode"] = "dashboard"
+                        nav_state["current_key"] = None
+
+                    elif action == "login":
+                        MenuV2.clear_screen()
+                        print(f"--- LOGIN ---")
+                        u_name = input("Username: ")
+                        p_word = input("Password: ")
+                        user = auth_service.login(u_name, p_word)
+                        if user:
+                            current_session = user
+                            print(f"\n✅ Success")
+                            nav_state["mode"] = "dashboard"
+                        else:
+                            print(f"\n❌ Failed")
+                        input("\nEnter to continue...")
+
+                    elif action == "register":
+                        MenuV2.clear_screen()
+                        print(f"--- REGISTER ---")
+                        u_name = input("New Username: ")
+                        p_word = input("New Password: ")
+                        success, msg = auth_service.register(u_name, p_word)
+                        print(f"\n📢 {msg}")
+                        input("\nEnter to continue...")
+
+                    elif action == "market_data":
+                        all_assets = market_service.get_all_assets()
+                        # using legacy table drawer
+                        Menu.show_market_table(all_assets)
+                        input("\nEnter to return...")
+
+                    elif action == "news":
+                        news = news_service.get_latest_news(current_lang)
+                        Menu.show_news(news)
+                        input("\nEnter to return...")
+
+                    elif action == "faq":
+                        content = support_service.get_support_content(current_lang)
+                        Menu.show_support_page(content)
+                        input("\nEnter to return...")
+
+                    else:
+                        print(f"\n[🚧] Feature under development")
+                        input("Enter to continue...")
+
+                else:
+                    pass
+
+        # member mode logic
         else:
+            # legacy member dashboard
+            # will be updated to v2 later
             Menu.draw_member_dashboard(current_lang, current_session)
-            choice = input(s["choice"]).upper()
+            choice = input("Select: ").upper()
 
-            if choice == "1":
+            if choice == "O":
+                current_session = None
+                nav_state["mode"] = "dashboard"
+                print("\n👋 Logout")
+                time.sleep(1)
+
+            # basic logout handling for now
+            # other member features remain same as legacy code
+            elif choice == "1":
                 all_assets = market_service.get_all_assets()
                 Menu.show_market_table(all_assets)
-                input("\nPress Enter to return...")
-
-            elif choice == "2":
-                summary = wallet_service.get_portfolio_summary(current_session)
-                Menu.show_wallet_details(summary)
-                input("\nPress Enter to return...")
-
-            elif choice == "3":
-                Menu.draw_trade_menu()
-                sub_choice = input(s["choice"]).upper()
-                if sub_choice == "B":
-                    symbol = input("Coin Symbol (e.g. BTC): ").upper()
-                    try:
-                        amount = float(input("Amount in USDT: "))
-                        success, msg = trade_service.buy_asset(current_session, symbol, amount)
-                        Menu.show_message(msg)
-                    except ValueError:
-                        Menu.show_message("Invalid number format!")
-                elif sub_choice == "S":
-                    symbol = input("Coin Symbol (e.g. BTC): ").upper()
-                    try:
-                        amount = float(input("Amount to Sell: "))
-                        success, msg = trade_service.sell_asset(current_session, symbol, amount)
-                        Menu.show_message(msg)
-                    except ValueError:
-                        Menu.show_message("Invalid number format!")
-                input("\nPress Enter to return...")
-
-            elif choice == "4":
-                news = news_service.get_latest_news(current_lang)
-                Menu.show_news(news)
-                input("\nPress Enter to return...")
-
-            elif choice == "5":
-                Menu.show_history(current_session.history)
-                input("\nPress Enter to return...")
-
-            elif choice == "D": # <-- ÜYE DESTEK
-                content = support_service.get_support_content(current_lang)
-                Menu.show_support_page(content)
-                input("\nPress Enter to return...")
-
-            elif choice == "O":
-                current_session = None
-                Menu.show_message(s["logout"])
-                input("\nPress Enter...")
-
+                input("\nEnter...")
             else:
-                Menu.show_message("Feature coming soon...")
-                input("\nPress Enter...")
+                print("Option not available in demo")
+                time.sleep(1)
+
 
 if __name__ == "__main__":
     main()

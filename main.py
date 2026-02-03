@@ -44,7 +44,7 @@ def main():
         # check guest mode
         if current_session is None:
 
-            # --- DASHBOARD VIEW ---
+            # dashboard view
             if nav_state["mode"] == "dashboard":
                 MenuV2.draw_mega_dashboard(guest_mega_menu)
                 print(" 👉 Select (1-6) or Q:")
@@ -61,18 +61,15 @@ def main():
                 else:
                     pass
 
-            # --- SUBMENU VIEW ---
+            # submenu view
             elif nav_state["mode"] == "submenu":
                 current_key = nav_state["current_key"]
 
-                # safety check if key exists
                 if current_key not in guest_sub_menus:
                     nav_state["mode"] = "dashboard"
                     continue
 
                 menu_data = guest_sub_menus[current_key]
-
-                # build dynamic breadcrumb path
                 base_path = ["HOME", menu_data["title"]]
 
                 MenuV2.draw_submenu(menu_data, base_path)
@@ -84,29 +81,39 @@ def main():
                     action = selected_option.get("action")
                     label = selected_option.get("label")
 
-                    # --- ACTION HANDLERS ---
+                    # action handlers
 
-                    # 1. Navigation Logic (Deep Menus)
+                    # navigation logic
                     if action and action.startswith("NAV_"):
-                        # switch to deeper submenu
-                        # example NAV_MARKET_DATA becomes market_data
                         nav_state["current_key"] = action.replace("NAV_", "").lower()
-                        # loop continues and draws new submenu
                         continue
 
-                    # 2. Global Back Button
+                    # back logic
                     elif action == "GO_BACK":
-                        # return to main dashboard
                         nav_state["mode"] = "dashboard"
                         nav_state["current_key"] = None
 
-                    # 3. Language Toggle
-                    elif action == "lang":
-                        current_lang = "tr" if current_lang == "en" else "en"
+                    # language settings
+                    elif action == "set_lang_en":
+                        current_lang = "en"
+                        print("\n✅ Language set to English")
+                        time.sleep(0.5)
                         nav_state["mode"] = "dashboard"
                         nav_state["current_key"] = None
 
-                    # 4. Auth Actions
+                    elif action == "set_lang_tr":
+                        current_lang = "tr"
+                        print("\n✅ Dil Türkçe olarak ayarlandı")
+                        time.sleep(0.5)
+                        nav_state["mode"] = "dashboard"
+                        nav_state["current_key"] = None
+
+                    elif action in ["set_lang_de", "set_lang_es", "set_lang_ru", "set_lang_zh"]:
+                        MenuV2.prepare_content_screen(base_path + ["LANGUAGE"])
+                        print(f"\n 🚧 {label} coming soon!")
+                        input("\nEnter to continue...")
+
+                    # auth logic
                     elif action == "login":
                         MenuV2.prepare_content_screen(base_path + ["LOGIN"])
                         u_name = input("Username: ")
@@ -128,15 +135,13 @@ def main():
                         print(f"\n📢 {msg}")
                         input("\nEnter to continue...")
 
-                    # 5. Market Features
-                    # mapped to new action names from menu_map
-                    elif action in ["view_prices", "view_listings", "view_gainers"]:
+                    # features
+                    elif action in ["view_prices", "view_listings", "view_gainers", "view_sectors", "view_fear_greed"]:
                         MenuV2.prepare_content_screen(base_path + ["PRICES"])
                         all_assets = market_service.get_all_assets()
                         Menu.show_market_table(all_assets)
                         input("\nEnter to return...")
 
-                    # 6. Content Features
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"])
                         news = news_service.get_latest_news(current_lang)
@@ -149,11 +154,9 @@ def main():
                         Menu.show_support_page(content)
                         input("\nEnter to return...")
 
-                    # 7. Placeholder for Future Features
                     else:
                         MenuV2.prepare_content_screen(base_path + [label])
                         print(f"\n[🚧] Feature '{label}' is under development")
-                        print("    We are working on this module")
                         input("\nEnter to continue...")
 
                 else:

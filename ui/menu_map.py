@@ -1,13 +1,10 @@
 # ui/menu_map.py
 
 def get_guest_menu_structure(lang="en"):
-    """
-    Defines the 3-level deep menu structure.
-    Labels are bilingual (EN/TR).
-    """
+    # define labels
     labels = {
         "en": {
-            # --- DASHBOARD COLUMN HEADERS ---
+            # dashboard headers
             "m1": "MARKETS",
             "m2": "TRADE",
             "m3": "DISCOVER",
@@ -15,33 +12,29 @@ def get_guest_menu_structure(lang="en"):
             "m5": "SUPPORT",
             "m6": "ACCOUNT",
 
-            # --- LEVEL 2: SUB-CATEGORIES (Previews) ---
+            # level 2 previews
             "m1_cats": ["Market Data", "Analysis Tools", "Calendars"],
             "m2_cats": ["Trading", "Simulation", "Earn & Borrow"],
             "m3_cats": ["News", "Announcements", "Research", "Reports", "Academy"],
             "m4_cats": ["About Us", "Team", "Partners", "Sitemap"],
             "m5_cats": ["FAQ", "Contact", "Fees", "Risk Notice"],
-            "m6_cats": ["Search", "Language", "Login", "Register"],
+            # column 6 has emojis
+            "m6_cats": ["🔍 Search", "🌐 Language", "🔑 Login", "📝 Register"],
 
-            # --- LEVEL 3: DETAILED ITEMS ---
-            # Markets -> Data
+            # level 3 detailed items
             "md_items": ["Crypto Prices", "New Listings", "Gainers/Losers", "Sectors (DeFi/AI)", "Fear & Greed Index"],
-            # Markets -> Analysis
             "ma_items": ["TradingView Chart", "Heatmap", "On-Chain Data", "Whale Alert", "Gas Fee Heatmap"],
-            # Markets -> Calendars
             "mc_items": ["Economic Calendar", "Airdrop & ICO", "Token Unlocks"],
 
-            # Trade -> Ops
             "to_items": ["Swap (Easy Buy/Sell)", "Spot Market", "Convert"],
-            # Trade -> Sim
             "ts_items": ["Paper Trading", "Virtual Portfolio"],
-            # Trade -> Earn
             "te_items": ["Earn / Staking", "Crypto Loans"],
+
+            "langs": ["🇺🇸 English", "🇹🇷 Türkçe", "🇩🇪 Deutsch", "🇪🇸 Español", "🇷🇺 Русский", "🇨🇳 Chinese (Zh)"],
 
             "back": "Go Back"
         },
         "tr": {
-            # --- DASHBOARD COLUMN HEADERS ---
             "m1": "PIYASALAR",
             "m2": "AL-SAT",
             "m3": "KESFET",
@@ -49,24 +42,23 @@ def get_guest_menu_structure(lang="en"):
             "m5": "DESTEK",
             "m6": "HESAP",
 
-            # --- LEVEL 2: SUB-CATEGORIES ---
             "m1_cats": ["Piyasa Verileri", "Analiz Araçları", "Takvimler"],
             "m2_cats": ["İşlemler", "Simülasyon", "Kazan & Borçlan"],
             "m3_cats": ["Haberler", "Duyurular", "Araştırmalar", "Raporlar", "Akademi"],
             "m4_cats": ["Hakkımızda", "Yönetim Ekibi", "İş Ortakları", "Site Haritası"],
             "m5_cats": ["SSS", "İletişim", "Ücretler", "Risk Bildirimi"],
-            "m6_cats": ["Arama", "Dil", "Giriş", "Kayıt"],
+            # column 6 has emojis
+            "m6_cats": ["🔍 Arama", "🌐 Dil", "🔑 Giriş", "📝 Kayıt"],
 
-            # --- LEVEL 3: DETAILED ITEMS ---
-            "md_items": ["Kripto Fiyatları", "Yeni Listelenenler", "Kazananlar/Kaybedenler", "Sektörler (DeFi/AI)",
-                         "Korku & Açgözlülük"],
-            "ma_items": ["Gelişmiş Grafik", "Sıcaklık Haritası", "Zincir Üstü Veriler", "Balina Hareketleri",
-                         "Gas Fee Heatmap"],
+            "md_items": ["Kripto Fiyatları", "Yeni Listelenenler", "Kazananlar/Kaybedenler", "Sektörler (DeFi/AI)", "Korku & Açgözlülük"],
+            "ma_items": ["Gelişmiş Grafik", "Sıcaklık Haritası", "Zincir Üstü Veriler", "Balina Hareketleri", "Gas Fee Heatmap"],
             "mc_items": ["Ekonomik Takvim", "Airdrop & ICO", "Token Kilit Açılımı"],
 
             "to_items": ["Kolay Al/Sat", "Spot Borsa", "Hızlı Dönüştür"],
             "ts_items": ["Demo İşlem", "Sanal Portföy"],
             "te_items": ["Kazan (Staking)", "Kripto Krediler"],
+
+            "langs": ["🇺🇸 English", "🇹🇷 Türkçe", "🇩🇪 Deutsch", "🇪🇸 Español", "🇷🇺 Русский", "🇨🇳 Çince (Zh)"],
 
             "back": "Geri Dön"
         }
@@ -74,25 +66,23 @@ def get_guest_menu_structure(lang="en"):
 
     txt = labels.get(lang, labels["en"])
 
-    # 1. MEGA MENU (DASHBOARD)
-    # The 'preview' list now shows the Level 2 Categories as requested.
+    # mega menu tree
     menu_tree = {
         "1": {"title": txt["m1"], "goto": "markets", "preview": txt["m1_cats"]},
-        "2": {"title": txt["m2"], "goto": "trade", "preview": txt["m2_cats"]},
+        "2": {"title": txt["m2"], "goto": "trade",   "preview": txt["m2_cats"]},
         "3": {"title": txt["m3"], "goto": "discover", "preview": txt["m3_cats"]},
-        "4": {"title": txt["m4"], "goto": "company", "preview": txt["m4_cats"]},
-        "5": {"title": txt["m5"], "goto": "support", "preview": txt["m5_cats"]},
-        "6": {"title": txt["m6"], "goto": "account", "preview": txt["m6_cats"]}
+        "4": {"title": txt["m4"], "goto": "company",  "preview": txt["m4_cats"]},
+        "5": {"title": txt["m5"], "goto": "support",  "preview": txt["m5_cats"]},
+        "6": {"title": txt["m6"], "goto": "account",  "preview": txt["m6_cats"]}
     }
 
-    # 2. SUB MENUS (ROUTER & DETAIL PAGES)
-    # We use "NAV_" prefix to tell main.py to go deeper into a menu
+    # sub menus
     sub_menus = {
-        # --- LEVEL 2: ROUTER MENUS ---
+        # level 2 router menus
         "markets": {
             "title": txt["m1"],
             "options": {
-                "1": {"label": txt["m1_cats"][0], "action": "NAV_MARKET_DATA"},  # Go deeper
+                "1": {"label": txt["m1_cats"][0], "action": "NAV_MARKET_DATA"},
                 "2": {"label": txt["m1_cats"][1], "action": "NAV_MARKET_ANALYSIS"},
                 "3": {"label": txt["m1_cats"][2], "action": "NAV_MARKET_CALENDAR"},
                 "0": {"label": txt["back"], "action": "GO_BACK"}
@@ -108,7 +98,7 @@ def get_guest_menu_structure(lang="en"):
             }
         },
 
-        # --- LEVEL 3: MARKETS DETAILED ---
+        # level 3 market details
         "market_data": {
             "title": txt["m1_cats"][0].upper(),
             "options": {
@@ -141,7 +131,7 @@ def get_guest_menu_structure(lang="en"):
             }
         },
 
-        # --- LEVEL 3: TRADE DETAILED ---
+        # level 3 trade details
         "trade_ops": {
             "title": txt["m2_cats"][0].upper(),
             "options": {
@@ -168,7 +158,7 @@ def get_guest_menu_structure(lang="en"):
             }
         },
 
-        # --- OTHER MENUS (Standard) ---
+        # standard columns
         "discover": {
             "title": txt["m3"],
             "options": {
@@ -200,13 +190,29 @@ def get_guest_menu_structure(lang="en"):
                 "0": {"label": txt["back"], "action": "GO_BACK"}
             }
         },
+
+        # account menu
         "account": {
             "title": txt["m6"],
             "options": {
                 "1": {"label": txt["m6_cats"][0], "action": "search"},
-                "2": {"label": txt["m6_cats"][1], "action": "lang"},
+                "2": {"label": txt["m6_cats"][1], "action": "NAV_LANGUAGE_SELECT"},
                 "3": {"label": txt["m6_cats"][2], "action": "login"},
                 "4": {"label": txt["m6_cats"][3], "action": "register"},
+                "0": {"label": txt["back"], "action": "GO_BACK"}
+            }
+        },
+
+        # language menu
+        "language_select": {
+            "title": "SELECT LANGUAGE / DİL SEÇİMİ",
+            "options": {
+                "1": {"label": txt["langs"][0], "action": "set_lang_en"},
+                "2": {"label": txt["langs"][1], "action": "set_lang_tr"},
+                "3": {"label": txt["langs"][2], "action": "set_lang_de"},
+                "4": {"label": txt["langs"][3], "action": "set_lang_es"},
+                "5": {"label": txt["langs"][4], "action": "set_lang_ru"},
+                "6": {"label": txt["langs"][5], "action": "set_lang_zh"},
                 "0": {"label": txt["back"], "action": "GO_BACK"}
             }
         }

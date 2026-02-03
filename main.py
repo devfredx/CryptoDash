@@ -64,10 +64,15 @@ def main():
             # --- SUBMENU VIEW ---
             elif nav_state["mode"] == "submenu":
                 current_key = nav_state["current_key"]
+
+                # safety check if key exists
+                if current_key not in guest_sub_menus:
+                    nav_state["mode"] = "dashboard"
+                    continue
+
                 menu_data = guest_sub_menus[current_key]
 
                 # build dynamic breadcrumb path
-                # example HOME > MARKETS
                 base_path = ["HOME", menu_data["title"]]
 
                 MenuV2.draw_submenu(menu_data, base_path)
@@ -81,20 +86,29 @@ def main():
 
                     # --- ACTION HANDLERS ---
 
-                    if action == "GO_BACK":
+                    # 1. Navigation Logic (Deep Menus)
+                    if action and action.startswith("NAV_"):
+                        # switch to deeper submenu
+                        # example NAV_MARKET_DATA becomes market_data
+                        nav_state["current_key"] = action.replace("NAV_", "").lower()
+                        # loop continues and draws new submenu
+                        continue
+
+                    # 2. Global Back Button
+                    elif action == "GO_BACK":
+                        # return to main dashboard
                         nav_state["mode"] = "dashboard"
                         nav_state["current_key"] = None
 
+                    # 3. Language Toggle
                     elif action == "lang":
                         current_lang = "tr" if current_lang == "en" else "en"
                         nav_state["mode"] = "dashboard"
                         nav_state["current_key"] = None
 
+                    # 4. Auth Actions
                     elif action == "login":
-                        # clear screen and show breadcrumb
-                        # HOME > ACCOUNT > LOGIN
                         MenuV2.prepare_content_screen(base_path + ["LOGIN"])
-
                         u_name = input("Username: ")
                         p_word = input("Password: ")
                         user = auth_service.login(u_name, p_word)
@@ -108,43 +122,44 @@ def main():
 
                     elif action == "register":
                         MenuV2.prepare_content_screen(base_path + ["REGISTER"])
-
                         u_name = input("New Username: ")
                         p_word = input("New Password: ")
                         success, msg = auth_service.register(u_name, p_word)
                         print(f"\n📢 {msg}")
                         input("\nEnter to continue...")
 
-                    elif action == "market_data":
-                        MenuV2.prepare_content_screen(base_path + ["MARKET DATA"])
-
+                    # 5. Market Features
+                    # mapped to new action names from menu_map
+                    elif action in ["view_prices", "view_listings", "view_gainers"]:
+                        MenuV2.prepare_content_screen(base_path + ["PRICES"])
                         all_assets = market_service.get_all_assets()
                         Menu.show_market_table(all_assets)
                         input("\nEnter to return...")
 
+                    # 6. Content Features
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"])
-
                         news = news_service.get_latest_news(current_lang)
                         Menu.show_news(news)
                         input("\nEnter to return...")
 
                     elif action == "faq":
                         MenuV2.prepare_content_screen(base_path + ["FAQ"])
-
                         content = support_service.get_support_content(current_lang)
                         Menu.show_support_page(content)
                         input("\nEnter to return...")
 
+                    # 7. Placeholder for Future Features
                     else:
                         MenuV2.prepare_content_screen(base_path + [label])
-                        print(f"\n[🚧] Feature under development")
-                        input("Enter to continue...")
+                        print(f"\n[🚧] Feature '{label}' is under development")
+                        print("    We are working on this module")
+                        input("\nEnter to continue...")
 
                 else:
                     pass
 
-        # member mode logic (kept simple for now)
+        # member mode logic
         else:
             Menu.draw_member_dashboard(current_lang, current_session)
             choice = input("Select: ").upper()
@@ -165,4 +180,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    

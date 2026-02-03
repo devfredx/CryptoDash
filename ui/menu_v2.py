@@ -1,17 +1,27 @@
 # ui/menu_v2.py
 
 import os
+import sys
 
+# ansi color codes
+class C:
+    CYAN = '\033[96m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    END = '\033[0m'
+    GREY = '\033[90m'
 
 class MenuV2:
     @staticmethod
     def clear_screen():
         # clear terminal screen based on os
         os.system('cls' if os.name == 'nt' else 'clear')
+        # ansi escape code for ide support
+        sys.stdout.write("\033[H\033[J")
 
     @staticmethod
     def draw_header(path_str, user_info="Guest"):
-        # simple header without heavy borders
+        # simple header
         print(f"\n 📍 CRYPTODASH > {path_str}")
         print("-" * 120)
         print(f" 👤 {user_info:<90} 🌐 v2.0-dev")
@@ -19,7 +29,6 @@ class MenuV2:
 
     @staticmethod
     def prepare_content_screen(breadcrumb_path, user_info="Guest"):
-        # clears screen and draws header for content pages
         MenuV2.clear_screen()
         path_str = " > ".join(breadcrumb_path)
         MenuV2.draw_header(path_str, user_info)
@@ -29,14 +38,20 @@ class MenuV2:
         MenuV2.clear_screen()
         MenuV2.draw_header("HOME")
 
-        col_width = 19
+        col_width = 20
         header_row = ""
         separator_row = ""
 
         for key, val in menu_tree.items():
-            title = f"{key}. {val['title']}"
-            header_row += f"{title:<{col_width}}"
-            separator_row += f"{'-' * 15:<{col_width}}"
+            # color the number only
+            title = f"{C.WARNING}{key}.{C.END} {val['title']}"
+
+            # calculate padding
+            visible_len = len(f"{key}. {val['title']}")
+            padding = " " * (col_width - visible_len)
+
+            header_row += f"{title}{padding}"
+            separator_row += f"{'-'*15:<{col_width}}"
 
         print(f" {header_row}")
         print(f" {separator_row}")
@@ -58,8 +73,7 @@ class MenuV2:
 
             print(f" {row_str}")
 
-        print(
-            "\n========================================================================================================================")
+        print("\n" + "=" * 120)
         print(" [Select Column: 1-6]")
 
     @staticmethod
@@ -71,6 +85,10 @@ class MenuV2:
         print(f"   --- {menu_data['title']} ---\n")
 
         for key, val in menu_data['options'].items():
-            print(f"   [{key}] {val['label']}")
+            # color logic for buttons
+            if val['action'] == "GO_BACK":
+                print(f"   [{C.FAIL}{key}{C.END}] {val['label']}")
+            else:
+                print(f"   [{C.WARNING}{key}{C.END}] {val['label']}")
 
         print("")

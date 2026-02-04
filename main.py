@@ -14,7 +14,17 @@ from service.support_service import SupportService
 
 # v2 imports
 from ui.menu_map import get_guest_menu_structure
-from ui.menu_v2 import MenuV2
+from ui.menu_v2 import MenuV2, C
+
+
+# helper function for formatting numbers
+def format_large_number(num):
+    # formats 1,000,000 to 1.0M, 1,000,000,000 to 1.0B
+    if num >= 1_000_000_000:
+        return f"{num / 1_000_000_000:.1f}B"
+    elif num >= 1_000_000:
+        return f"{num / 1_000_000:.1f}M"
+    return str(num)
 
 
 def main():
@@ -135,12 +145,71 @@ def main():
                         print(f"\n📢 {msg}")
                         input("\nEnter to continue...")
 
-                    # features
-                    elif action in ["view_prices", "view_listings", "view_gainers", "view_sectors", "view_fear_greed"]:
-                        MenuV2.prepare_content_screen(base_path + ["PRICES"])
-                        all_assets = market_service.get_all_assets()
-                        Menu.show_market_table(all_assets)
+                    # --- MARKET DATA FEATURES (UPDATED) ---
+                    elif action == "view_prices":
+                        MenuV2.prepare_content_screen(base_path + ["CRYPTO PRICES"])
+
+                        # fetch rich data
+                        data = market_service.get_top_coins()
+
+                        # modern table headers
+                        headers = ["#", "ASSET", "PRICE", "24H %", "M. CAP", "VOL (24H)"]
+                        # adjust widths for better spacing
+                        widths = [4, 16, 14, 12, 12, 12]
+
+                        table_rows = []
+
+                        for coin in data:
+                            # format change with arrow
+                            change_val = coin['change']
+                            arrow = "▲" if change_val >= 0 else "▼"
+                            change_str = f"{arrow} {change_val}%"
+
+                            # format asset name like "BTC • Bitcoin"
+                            asset_str = f"{coin['symbol']} • {coin['name']}"
+
+                            row = [
+                                str(coin["rank"]),  # #
+                                asset_str,  # ASSET
+                                f"${coin['price']:,.2f}",  # PRICE
+                                change_str,  # 24H %
+                                format_large_number(coin["mcap"]),  # M. CAP
+                                format_large_number(coin["vol"])  # VOL
+                            ]
+                            table_rows.append(row)
+
+                        MenuV2.draw_table(headers, table_rows, widths)
                         input("\nEnter to return...")
+
+                    elif action == "view_listings":
+                        MenuV2.prepare_content_screen(base_path + ["NEW LISTINGS"])
+
+                        data = market_service.get_new_listings()
+                        headers = ["Symbol", "Name", "List Price", "Performance", "Listed"]
+                        widths = [10, 15, 15, 15, 15]
+                        table_rows = []
+
+                        for coin in data:
+                            row = [coin["symbol"], coin["name"], f"${coin['price']}", f"{coin['change']}%",
+                                   coin["date"]]
+                            table_rows.append(row)
+
+                        MenuV2.draw_table(headers, table_rows, widths)
+                        input("\nEnter to return...")
+
+                    elif action == "view_gainers":
+                        MenuV2.prepare_content_screen(base_path + ["GAINERS & LOSERS"])
+                        gainers, losers = market_service.get_gainers_losers()
+
+                        print(f"   {C.GREEN}🚀 TOP GAINERS{C.END}")
+                        for g in gainers:
+                            print(f"   • {g['symbol']:<10} {C.GREEN}+{g['change']}%{C.END} (${g['price']})")
+
+                        print(f"\n   {C.FAIL}📉 TOP LOSERS{C.END}")
+                        for l in losers:
+                            print(f"   • {l['symbol']:<10} {C.FAIL}{l['change']}%{C.END} (${l['price']})")
+
+                        input("\n\nEnter to return...")
 
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"])
@@ -166,7 +235,6 @@ def main():
         else:
             Menu.draw_member_dashboard(current_lang, current_session)
             choice = input("Select: ").upper()
-
             if choice == "O":
                 current_session = None
                 nav_state["mode"] = "dashboard"

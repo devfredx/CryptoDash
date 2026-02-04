@@ -3,13 +3,17 @@
 import os
 import sys
 
+
 # ansi color codes
 class C:
     CYAN = '\033[96m'
     WARNING = '\033[93m'
     FAIL = '\033[91m'
+    GREEN = '\033[92m'
     END = '\033[0m'
     GREY = '\033[90m'
+    BOLD = '\033[1m'
+
 
 class MenuV2:
     @staticmethod
@@ -51,7 +55,7 @@ class MenuV2:
             padding = " " * (col_width - visible_len)
 
             header_row += f"{title}{padding}"
-            separator_row += f"{'-'*15:<{col_width}}"
+            separator_row += f"{'-' * 15:<{col_width}}"
 
         print(f" {header_row}")
         print(f" {separator_row}")
@@ -90,5 +94,41 @@ class MenuV2:
                 print(f"   [{C.FAIL}{key}{C.END}] {val['label']}")
             else:
                 print(f"   [{C.WARNING}{key}{C.END}] {val['label']}")
+
+        print("")
+
+    @staticmethod
+    def draw_table(headers, data, col_widths):
+
+        # 1. draw header row with cyan color
+        header_str = "   "
+        for i, h in enumerate(headers):
+            # headers are bold and cyan
+            header_str += f"{C.BOLD}{C.CYAN}{h:<{col_widths[i]}}{C.END}"
+
+        print(header_str)
+        # modern thin separator line
+        print("   " + f"{C.GREY}{'-' * (sum(col_widths))}{C.END}")
+
+        # 2. draw data rows
+        for row in data:
+            row_str = "   "
+            for i, item in enumerate(row):
+                val_str = str(item)
+                color = C.END
+
+                # logic for coloring percentages and arrows
+                if "%" in val_str:
+                    if "-" in val_str or "▼" in val_str:
+                        color = C.FAIL  # red
+                    else:
+                        color = C.GREEN  # green
+
+                # highlight rank number in orange
+                if i == 0 and val_str.isdigit():
+                    color = C.WARNING
+
+                row_str += f"{color}{val_str:<{col_widths[i]}}{C.END}"
+            print(row_str)
 
         print("")

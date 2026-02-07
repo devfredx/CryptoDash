@@ -19,7 +19,6 @@ from ui.menu_v2 import MenuV2, C
 
 # helper function for formatting numbers
 def format_large_number(num):
-    # formats 1,000,000 to 1.0M, 1,000,000,000 to 1.0B
     if num >= 1_000_000_000:
         return f"{num / 1_000_000_000:.1f}B"
     elif num >= 1_000_000:
@@ -51,14 +50,38 @@ def main():
         s = STRINGS.get(current_lang, STRINGS["en"])
         guest_mega_menu, guest_sub_menus = get_guest_menu_structure(current_lang)
 
+        # --- UI TRANSLATION LOGIC (NEW) ---
+        # Define common UI strings based on current language
+        if current_lang == "tr":
+            ui_home = "ANASAYFA"
+            ui_guest = "Misafir"
+            ui_select_main = " 👉 Seçim (1-6) veya Q:"
+            ui_select_sub = " 👉 Seçim Yapınız:"
+            ui_input_prefix = "    > "
+            ui_return_msg = "Geri dönmek için Enter..."
+            ui_goodbye = "Güle güle..."
+        else:
+            ui_home = "HOME"
+            ui_guest = "Guest"
+            ui_select_main = " 👉 Select (1-6) or Q:"
+            ui_select_sub = " 👉 Select Option:"
+            ui_input_prefix = "    > "
+            ui_return_msg = "Enter to return..."
+            ui_goodbye = "Goodbye"
+
+        # Determine user label
+        user_label = current_session.username if current_session else ui_guest
+
         # check guest mode
         if current_session is None:
 
             # dashboard view
             if nav_state["mode"] == "dashboard":
-                MenuV2.draw_mega_dashboard(guest_mega_menu)
-                print(" 👉 Select (1-6) or Q:")
-                choice = input("    > ").upper().strip()
+                # Pass translated titles and user label
+                MenuV2.draw_mega_dashboard(guest_mega_menu, page_title=ui_home, user_info=user_label)
+
+                print(ui_select_main)
+                choice = input(ui_input_prefix).upper().strip()
 
                 if choice in guest_mega_menu:
                     target_key = guest_mega_menu[choice]["goto"]
@@ -66,7 +89,7 @@ def main():
                     nav_state["mode"] = "submenu"
 
                 elif choice == "Q":
-                    print("Goodbye")
+                    print(ui_goodbye)
                     break
                 else:
                     pass
@@ -80,11 +103,11 @@ def main():
                     continue
 
                 menu_data = guest_sub_menus[current_key]
-                base_path = ["HOME", menu_data["title"]]
+                base_path = [ui_home, menu_data["title"]]
 
-                MenuV2.draw_submenu(menu_data, base_path)
-                print(" 👉 Select Option:")
-                sub_choice = input("    > ").upper().strip()
+                MenuV2.draw_submenu(menu_data, base_path, user_info=user_label)
+                print(ui_select_sub)
+                sub_choice = input(ui_input_prefix).upper().strip()
 
                 if sub_choice in menu_data["options"]:
                     selected_option = menu_data["options"][sub_choice]
@@ -119,15 +142,20 @@ def main():
                         nav_state["current_key"] = None
 
                     elif action in ["set_lang_de", "set_lang_es", "set_lang_ru", "set_lang_zh"]:
-                        MenuV2.prepare_content_screen(base_path + ["LANGUAGE"])
+                        MenuV2.prepare_content_screen(base_path + ["LANGUAGE"], user_info=user_label)
                         print(f"\n 🚧 {label} coming soon!")
-                        input("\nEnter to continue...")
+                        input(f"\n{ui_return_msg}")
 
                     # auth logic
                     elif action == "login":
-                        MenuV2.prepare_content_screen(base_path + ["LOGIN"])
-                        u_name = input("Username: ")
-                        p_word = input("Password: ")
+                        t_title = "GİRİŞ" if current_lang == "tr" else "LOGIN"
+                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+                        prompt_u = "Kullanıcı Adı: " if current_lang == "tr" else "Username: "
+                        prompt_p = "Şifre: " if current_lang == "tr" else "Password: "
+
+                        u_name = input(prompt_u)
+                        p_word = input(prompt_p)
                         user = auth_service.login(u_name, p_word)
                         if user:
                             current_session = user
@@ -135,57 +163,66 @@ def main():
                             nav_state["mode"] = "dashboard"
                         else:
                             print(f"\n❌ Failed")
-                        input("\nEnter to continue...")
+                        input(f"\n{ui_return_msg}")
 
                     elif action == "register":
-                        MenuV2.prepare_content_screen(base_path + ["REGISTER"])
-                        u_name = input("New Username: ")
-                        p_word = input("New Password: ")
+                        t_title = "KAYIT" if current_lang == "tr" else "REGISTER"
+                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+                        prompt_u = "Yeni Kullanıcı Adı: " if current_lang == "tr" else "New Username: "
+                        prompt_p = "Yeni Şifre: " if current_lang == "tr" else "New Password: "
+
+                        u_name = input(prompt_u)
+                        p_word = input(prompt_p)
                         success, msg = auth_service.register(u_name, p_word)
                         print(f"\n📢 {msg}")
-                        input("\nEnter to continue...")
+                        input(f"\n{ui_return_msg}")
 
-                    # --- MARKET DATA FEATURES (UPDATED) ---
+                    # --- MARKET DATA FEATURES ---
                     elif action == "view_prices":
-                        MenuV2.prepare_content_screen(base_path + ["CRYPTO PRICES"])
+                        title = "KRİPTO FİYATLARI" if current_lang == "tr" else "CRYPTO PRICES"
+                        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
-                        # fetch rich data
                         data = market_service.get_top_coins()
 
-                        # modern table headers
-                        headers = ["#", "ASSET", "PRICE", "24H %", "M. CAP", "VOL (24H)"]
-                        # adjust widths for better spacing
-                        widths = [4, 16, 14, 12, 12, 12]
+                        if current_lang == "tr":
+                            headers = ["#", "VARLIK", "FİYAT", "24S %", "P. DEĞERİ", "HACİM (24S)"]
+                        else:
+                            headers = ["#", "ASSET", "PRICE", "24H %", "M. CAP", "VOL (24H)"]
 
+                        widths = [4, 16, 14, 12, 12, 12]
                         table_rows = []
 
                         for coin in data:
-                            # format change with arrow
                             change_val = coin['change']
                             arrow = "▲" if change_val >= 0 else "▼"
                             change_str = f"{arrow} {change_val}%"
-
-                            # format asset name like "BTC • Bitcoin"
                             asset_str = f"{coin['symbol']} • {coin['name']}"
 
                             row = [
-                                str(coin["rank"]),  # #
-                                asset_str,  # ASSET
-                                f"${coin['price']:,.2f}",  # PRICE
-                                change_str,  # 24H %
-                                format_large_number(coin["mcap"]),  # M. CAP
-                                format_large_number(coin["vol"])  # VOL
+                                str(coin["rank"]),
+                                asset_str,
+                                f"${coin['price']:,.2f}",
+                                change_str,
+                                format_large_number(coin["mcap"]),
+                                format_large_number(coin["vol"])
                             ]
                             table_rows.append(row)
 
                         MenuV2.draw_table(headers, table_rows, widths)
-                        input("\nEnter to return...")
+                        input(f"\n{ui_return_msg}")
 
                     elif action == "view_listings":
-                        MenuV2.prepare_content_screen(base_path + ["NEW LISTINGS"])
+                        title = "YENİ LİSTELEMELER" if current_lang == "tr" else "NEW LISTINGS"
+                        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
                         data = market_service.get_new_listings()
-                        headers = ["Symbol", "Name", "List Price", "Performance", "Listed"]
+
+                        if current_lang == "tr":
+                            headers = ["Sembol", "İsim", "Fiyat", "Perf", "Tarih"]
+                        else:
+                            headers = ["Symbol", "Name", "Price", "Perf", "Date"]
+
                         widths = [10, 15, 15, 15, 15]
                         table_rows = []
 
@@ -195,38 +232,42 @@ def main():
                             table_rows.append(row)
 
                         MenuV2.draw_table(headers, table_rows, widths)
-                        input("\nEnter to return...")
+                        input(f"\n{ui_return_msg}")
 
                     elif action == "view_gainers":
-                        MenuV2.prepare_content_screen(base_path + ["GAINERS & LOSERS"])
+                        title = "KAZANANLAR & KAYBEDENLER" if current_lang == "tr" else "GAINERS & LOSERS"
+                        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
                         gainers, losers = market_service.get_gainers_losers()
 
-                        print(f"   {C.GREEN}🚀 TOP GAINERS{C.END}")
+                        t_gainers = "EN ÇOK KAZANANLAR" if current_lang == "tr" else "ROCKET GAINERS"
+                        t_losers = "EN ÇOK KAYBEDENLER" if current_lang == "tr" else "TOP LOSERS"
+
+                        print(f"   {C.GREEN}🚀 {t_gainers}{C.END}")
                         for g in gainers:
                             print(f"   • {g['symbol']:<10} {C.GREEN}+{g['change']}%{C.END} (${g['price']})")
 
-                        print(f"\n   {C.FAIL}📉 TOP LOSERS{C.END}")
+                        print(f"\n   {C.FAIL}📉 {t_losers}{C.END}")
                         for l in losers:
                             print(f"   • {l['symbol']:<10} {C.FAIL}{l['change']}%{C.END} (${l['price']})")
 
-                        input("\n\nEnter to return...")
+                        input(f"\n\n{ui_return_msg}")
 
                     elif action == "news":
-                        MenuV2.prepare_content_screen(base_path + ["NEWS"])
+                        MenuV2.prepare_content_screen(base_path + ["NEWS"], user_info=user_label)
                         news = news_service.get_latest_news(current_lang)
                         Menu.show_news(news)
-                        input("\nEnter to return...")
+                        input(f"\n{ui_return_msg}")
 
                     elif action == "faq":
-                        MenuV2.prepare_content_screen(base_path + ["FAQ"])
+                        MenuV2.prepare_content_screen(base_path + ["FAQ"], user_info=user_label)
                         content = support_service.get_support_content(current_lang)
                         Menu.show_support_page(content)
-                        input("\nEnter to return...")
+                        input(f"\n{ui_return_msg}")
 
                     else:
-                        MenuV2.prepare_content_screen(base_path + [label])
+                        MenuV2.prepare_content_screen(base_path + [label], user_info=user_label)
                         print(f"\n[🚧] Feature '{label}' is under development")
-                        input("\nEnter to continue...")
+                        input(f"\n{ui_return_msg}")
 
                 else:
                     pass
@@ -235,12 +276,13 @@ def main():
         else:
             Menu.draw_member_dashboard(current_lang, current_session)
             choice = input("Select: ").upper()
+
             if choice == "O":
                 current_session = None
                 nav_state["mode"] = "dashboard"
 
             elif choice == "1":
-                MenuV2.prepare_content_screen(["MEMBER", "MARKETS"])
+                MenuV2.prepare_content_screen(["MEMBER", "MARKETS"], user_info=user_label)
                 all_assets = market_service.get_all_assets()
                 Menu.show_market_table(all_assets)
                 input("\nEnter...")

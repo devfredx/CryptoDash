@@ -24,23 +24,25 @@ class MenuV2:
         sys.stdout.write("\033[H\033[J")
 
     @staticmethod
-    def draw_header(path_str, user_info="Guest"):
+    def draw_header(path_str, user_info):
         # simple header
         print(f"\n 📍 CRYPTODASH > {path_str}")
         print("-" * 120)
+        # user_info is now dynamic (Guest or Misafir)
         print(f" 👤 {user_info:<90} 🌐 v2.0-dev")
         print("")
 
     @staticmethod
-    def prepare_content_screen(breadcrumb_path, user_info="Guest"):
+    def prepare_content_screen(breadcrumb_path, user_info):
         MenuV2.clear_screen()
         path_str = " > ".join(breadcrumb_path)
         MenuV2.draw_header(path_str, user_info)
 
     @staticmethod
-    def draw_mega_dashboard(menu_tree):
+    def draw_mega_dashboard(menu_tree, page_title="HOME", user_info="Guest"):
         MenuV2.clear_screen()
-        MenuV2.draw_header("HOME")
+        # Header title is now dynamic
+        MenuV2.draw_header(page_title, user_info)
 
         col_width = 20
         header_row = ""
@@ -81,10 +83,10 @@ class MenuV2:
         print(" [Select Column: 1-6]")
 
     @staticmethod
-    def draw_submenu(menu_data, breadcrumb_path):
+    def draw_submenu(menu_data, breadcrumb_path, user_info):
         MenuV2.clear_screen()
         path_str = " > ".join(breadcrumb_path)
-        MenuV2.draw_header(path_str)
+        MenuV2.draw_header(path_str, user_info)
 
         print(f"   --- {menu_data['title']} ---\n")
 
@@ -99,6 +101,10 @@ class MenuV2:
 
     @staticmethod
     def draw_table(headers, data, col_widths):
+        """
+        Generic table drawer with modern alignment.
+        Supports automatic color coding for price changes.
+        """
 
         # 1. draw header row with cyan color
         header_str = "   "
@@ -108,7 +114,7 @@ class MenuV2:
 
         print(header_str)
         # modern thin separator line
-        print("   " + f"{C.GREY}{'-' * (sum(col_widths))}{C.END}")
+        print("   " + f"{C.GREY}{'─' * (sum(col_widths))}{C.END}")
 
         # 2. draw data rows
         for row in data:
@@ -131,4 +137,6 @@ class MenuV2:
                 row_str += f"{color}{val_str:<{col_widths[i]}}{C.END}"
             print(row_str)
 
+        # 3. bottom border
+        print("   " + f"{C.GREY}{'─' * (sum(col_widths))}{C.END}")
         print("")

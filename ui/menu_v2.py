@@ -141,3 +141,27 @@ class MenuV2:
         # 3. bottom border
         print("   " + f"{C.GREY}{'─' * (sum(col_widths))}{C.END}")
         print("")
+
+    @staticmethod
+    def draw_gauge(value, label, width=50):
+        """
+        Draws a visual progress bar (gauge) for 0-100 values.
+        [||||||||||||||..........] 65 (Greed)
+        """
+        # Determine color based on value
+        color = C.GREY
+        if value < 25:
+            color = C.FAIL  # Red (Extreme Fear)
+        elif value < 45:
+            color = C.WARNING  # Orange (Fear)
+        elif value < 55:
+            color = C.CYAN  # Blue (Neutral)
+        else:
+            color = C.GREEN  # Green (Greed)
+
+        # Calculate filled portion
+        filled_len = int(width * value // 100)
+        bar = '█' * filled_len + '-' * (width - filled_len)
+
+        print(f"\n   {C.BOLD}MARKET SENTIMENT: {color}{label.upper()}{C.END}")
+        print(f"   {color}[{bar}] {value}/100{C.END}\n")

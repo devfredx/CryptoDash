@@ -50,8 +50,7 @@ def main():
         s = STRINGS.get(current_lang, STRINGS["en"])
         guest_mega_menu, guest_sub_menus = get_guest_menu_structure(current_lang)
 
-        # --- UI TRANSLATION LOGIC (NEW) ---
-        # Define common UI strings based on current language
+        # --- UI TRANSLATION LOGIC ---
         if current_lang == "tr":
             ui_home = "ANASAYFA"
             ui_guest = "Misafir"
@@ -60,6 +59,7 @@ def main():
             ui_input_prefix = "    > "
             ui_return_msg = "Geri dönmek için Enter..."
             ui_goodbye = "Güle güle..."
+            ui_footer = "[Sütun Seçimi: 1-6]"  # EKLENEN KISIM
         else:
             ui_home = "HOME"
             ui_guest = "Guest"
@@ -68,6 +68,7 @@ def main():
             ui_input_prefix = "    > "
             ui_return_msg = "Enter to return..."
             ui_goodbye = "Goodbye"
+            ui_footer = "[Select Column: 1-6]"  # EKLENEN KISIM
 
         # Determine user label
         user_label = current_session.username if current_session else ui_guest
@@ -77,8 +78,13 @@ def main():
 
             # dashboard view
             if nav_state["mode"] == "dashboard":
-                # Pass translated titles and user label
-                MenuV2.draw_mega_dashboard(guest_mega_menu, page_title=ui_home, user_info=user_label)
+                # Pass translated footer text
+                MenuV2.draw_mega_dashboard(
+                    guest_mega_menu,
+                    page_title=ui_home,
+                    user_info=user_label,
+                    footer_text=ui_footer
+                )
 
                 print(ui_select_main)
                 choice = input(ui_input_prefix).upper().strip()

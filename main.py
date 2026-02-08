@@ -252,6 +252,38 @@ def main():
 
                         input(f"\n\n{ui_return_msg}")
 
+                    # sectors
+                    elif action == "view_sectors":
+                        title = "SEKTÖR PERFORMANSI" if current_lang == "tr" else "SECTOR PERFORMANCE"
+                        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
+
+                        # pass current_lang to service for translated data
+                        sectors = market_service.get_sector_data(current_lang)
+
+                        if current_lang == "tr":
+                            headers = ["#", "SEKTÖR", "PERF (24S)", "P. DEĞERİ", "LİDER COIN"]
+                        else:
+                            headers = ["#", "SECTOR", "PERF (24H)", "M. CAP", "TOP TOKEN"]
+
+                        widths = [4, 22, 12, 12, 12]  # increased name width slightly
+                        table_rows = []
+
+                        for s in sectors:
+                            arrow = "▲" if s['perf'] >= 0 else "▼"
+                            perf_str = f"{arrow} {s['perf']}%"
+
+                            row = [
+                                str(s['rank']),
+                                s['name'],
+                                perf_str,
+                                s['mcap'],
+                                s['top']
+                            ]
+                            table_rows.append(row)
+
+                        MenuV2.draw_table(headers, table_rows, widths)
+                        input(f"\n{ui_return_msg}")
+
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"], user_info=user_label)
                         news = news_service.get_latest_news(current_lang)

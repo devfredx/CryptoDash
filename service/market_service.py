@@ -61,3 +61,54 @@ class MarketService:
 
     def get_all_assets(self):
         return self.assets
+
+    def get_fear_greed_data(self, lang="en"):
+        """
+        Returns mock Fear & Greed Index data with localization.
+        """
+        # 0-100 Score
+        current_score = 74
+
+        # Localization dictionary
+        labels = {
+            "en": {
+                "extreme_fear": "Extreme Fear",
+                "fear": "Fear",
+                "neutral": "Neutral",
+                "greed": "Greed",
+                "extreme_greed": "Extreme Greed",
+                "periods": ["Now", "Yesterday", "Last Week", "Last Month"]
+            },
+            "tr": {
+                "extreme_fear": "Aşırı Korku",
+                "fear": "Korku",
+                "neutral": "Nötr",
+                "greed": "Açgözlülük",
+                "extreme_greed": "Aşırı Açgözlülük",
+                "periods": ["Şimdi", "Dün", "Geçen Hafta", "Geçen Ay"]
+            }
+        }
+
+        txt = labels.get(lang, labels["en"])
+
+        # Helper to determine status label based on score
+        def get_status(score):
+            if score < 25: return txt["extreme_fear"]
+            if score < 45: return txt["fear"]
+            if score < 55: return txt["neutral"]
+            if score < 75: return txt["greed"]
+            return txt["extreme_greed"]
+
+        # Mock Historical Data
+        history = [
+            {"period": txt["periods"][0], "value": current_score, "status": get_status(current_score)},
+            {"period": txt["periods"][1], "value": 65, "status": txt["greed"]},
+            {"period": txt["periods"][2], "value": 45, "status": txt["neutral"]},
+            {"period": txt["periods"][3], "value": 20, "status": txt["extreme_fear"]},
+        ]
+
+        return {
+            "current_value": current_score,
+            "current_status": get_status(current_score),
+            "history": history
+        }

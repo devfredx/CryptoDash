@@ -39,7 +39,7 @@ class MenuV2:
         MenuV2.draw_header(path_str, user_info)
 
     @staticmethod
-    def draw_mega_dashboard(menu_tree, page_title="HOME", user_info="Guest"):
+    def draw_mega_dashboard(menu_tree, page_title="HOME", user_info="Guest", footer_text="[Select Column: 1-6]"):
         MenuV2.clear_screen()
         # Header title is now dynamic
         MenuV2.draw_header(page_title, user_info)
@@ -80,7 +80,8 @@ class MenuV2:
             print(f" {row_str}")
 
         print("\n" + "=" * 120)
-        print(" [Select Column: 1-6]")
+        # Footer text is now dynamic
+        print(f" {footer_text}")
 
     @staticmethod
     def draw_submenu(menu_data, breadcrumb_path, user_info):

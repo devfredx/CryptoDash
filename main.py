@@ -59,7 +59,7 @@ def main():
             ui_input_prefix = "    > "
             ui_return_msg = "Geri dönmek için Enter..."
             ui_goodbye = "Güle güle..."
-            ui_footer = "[Sütun Seçimi: 1-6]"  # EKLENEN KISIM
+            ui_footer = "[Sütun Seçimi: 1-6]"
         else:
             ui_home = "HOME"
             ui_guest = "Guest"
@@ -68,7 +68,7 @@ def main():
             ui_input_prefix = "    > "
             ui_return_msg = "Enter to return..."
             ui_goodbye = "Goodbye"
-            ui_footer = "[Select Column: 1-6]"  # EKLENEN KISIM
+            ui_footer = "[Select Column: 1-6]"
 
         # Determine user label
         user_label = current_session.username if current_session else ui_guest
@@ -78,7 +78,6 @@ def main():
 
             # dashboard view
             if nav_state["mode"] == "dashboard":
-                # Pass translated footer text
                 MenuV2.draw_mega_dashboard(
                     guest_mega_menu,
                     page_title=ui_home,
@@ -258,12 +257,10 @@ def main():
 
                         input(f"\n\n{ui_return_msg}")
 
-                    # sectors
                     elif action == "view_sectors":
                         title = "SEKTÖR PERFORMANSI" if current_lang == "tr" else "SECTOR PERFORMANCE"
                         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
-                        # pass current_lang to service for translated data
                         sectors = market_service.get_sector_data(current_lang)
 
                         if current_lang == "tr":
@@ -271,7 +268,7 @@ def main():
                         else:
                             headers = ["#", "SECTOR", "PERF (24H)", "M. CAP", "TOP TOKEN"]
 
-                        widths = [4, 22, 12, 12, 12]  # increased name width slightly
+                        widths = [4, 22, 12, 12, 12]
                         table_rows = []
 
                         for s in sectors:
@@ -286,6 +283,46 @@ def main():
                                 s['top']
                             ]
                             table_rows.append(row)
+
+                        MenuV2.draw_table(headers, table_rows, widths)
+                        input(f"\n{ui_return_msg}")
+
+                    # --- FEAR & GREED INDEX (FIXED ALIGNMENT) ---
+                    elif action == "view_fear_greed":
+                        t_title = "KORKU & AÇGÖZLÜLÜK ENDEKSİ" if current_lang == "tr" else "FEAR & GREED INDEX"
+                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+                        fng_data = market_service.get_fear_greed_data(current_lang)
+                        MenuV2.draw_gauge(fng_data["current_value"], fng_data["current_status"])
+
+                        # HİZALAMA ÇÖZÜMÜ:
+                        # Verilerde renk kodu olduğu için karakter sayısı fazla görünüyor.
+                        # Başlığa da görünmez renk kodu (C.CYAN...C.END) ekleyerek uzunlukları eşitliyoruz.
+                        if current_lang == "tr":
+                            h_val = f"{C.CYAN}DEĞER{C.END}"
+                            headers = ["DÖNEM", h_val, "DURUM"]
+                        else:
+                            h_val = f"{C.CYAN}VALUE{C.END}"
+                            headers = ["PERIOD", h_val, "STATUS"]
+
+                        widths = [15, 20, 25]  # Genişlikler ayarlandı
+                        table_rows = []
+
+                        for item in fng_data["history"]:
+                            val = item['value']
+                            # Renklendirme mantığı
+                            if val < 45:
+                                val_str = f"{C.FAIL}{val}{C.END}"
+                            elif val > 55:
+                                val_str = f"{C.GREEN}{val}{C.END}"
+                            else:
+                                val_str = f"{C.CYAN}{val}{C.END}"
+
+                            table_rows.append([
+                                item['period'],
+                                val_str,
+                                item['status']
+                            ])
 
                         MenuV2.draw_table(headers, table_rows, widths)
                         input(f"\n{ui_return_msg}")

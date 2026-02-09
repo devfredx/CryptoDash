@@ -1,7 +1,8 @@
 # main.py
 
 import time
-# legacy imports
+
+# Legacy imports
 from ui.menu import Menu
 from ui.strings import STRINGS
 from repository.user_repository import UserRepository
@@ -12,12 +13,12 @@ from service.trade_service import TradeService
 from service.news_service import NewsService
 from service.support_service import SupportService
 
-# v2 imports
+# V2 imports
 from ui.menu_map import get_guest_menu_structure
 from ui.menu_v2 import MenuV2, C
 
 
-# helper function for formatting numbers
+# Helper function for number formatting
 def format_large_number(num):
     if num >= 1_000_000_000:
         return f"{num / 1_000_000_000:.1f}B"
@@ -27,7 +28,7 @@ def format_large_number(num):
 
 
 def main():
-    # initialize services
+    # Initialize services
     user_repo = UserRepository()
     auth_service = AuthService(user_repo)
     market_service = MarketService()
@@ -36,11 +37,11 @@ def main():
     news_service = NewsService()
     support_service = SupportService()
 
-    # app state
+    # App state
     current_lang = "en"
     current_session = None
 
-    # navigation state
+    # Navigation state
     nav_state = {
         "mode": "dashboard",
         "current_key": None
@@ -50,7 +51,7 @@ def main():
         s = STRINGS.get(current_lang, STRINGS["en"])
         guest_mega_menu, guest_sub_menus = get_guest_menu_structure(current_lang)
 
-        # --- UI TRANSLATION LOGIC ---
+        # UI translation logic
         if current_lang == "tr":
             ui_home = "ANASAYFA"
             ui_guest = "Misafir"
@@ -73,10 +74,10 @@ def main():
         # Determine user label
         user_label = current_session.username if current_session else ui_guest
 
-        # check guest mode
+        # Check guest mode
         if current_session is None:
 
-            # dashboard view
+            # Dashboard view
             if nav_state["mode"] == "dashboard":
                 MenuV2.draw_mega_dashboard(
                     guest_mega_menu,
@@ -99,7 +100,7 @@ def main():
                 else:
                     pass
 
-            # submenu view
+            # Submenu view
             elif nav_state["mode"] == "submenu":
                 current_key = nav_state["current_key"]
 
@@ -119,19 +120,19 @@ def main():
                     action = selected_option.get("action")
                     label = selected_option.get("label")
 
-                    # action handlers
+                    # Action handlers
 
-                    # navigation logic
+                    # Navigation logic
                     if action and action.startswith("NAV_"):
                         nav_state["current_key"] = action.replace("NAV_", "").lower()
                         continue
 
-                    # back logic
+                    # Back logic
                     elif action == "GO_BACK":
                         nav_state["mode"] = "dashboard"
                         nav_state["current_key"] = None
 
-                    # language settings
+                    # Language settings
                     elif action == "set_lang_en":
                         current_lang = "en"
                         print("\n✅ Language set to English")
@@ -151,7 +152,7 @@ def main():
                         print(f"\n 🚧 {label} coming soon!")
                         input(f"\n{ui_return_msg}")
 
-                    # auth logic
+                    # Auth logic
                     elif action == "login":
                         t_title = "GİRİŞ" if current_lang == "tr" else "LOGIN"
                         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
@@ -183,7 +184,7 @@ def main():
                         print(f"\n📢 {msg}")
                         input(f"\n{ui_return_msg}")
 
-                    # --- MARKET DATA FEATURES ---
+                    # Market data features
                     elif action == "view_prices":
                         title = "KRİPTO FİYATLARI" if current_lang == "tr" else "CRYPTO PRICES"
                         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
@@ -287,7 +288,7 @@ def main():
                         MenuV2.draw_table(headers, table_rows, widths)
                         input(f"\n{ui_return_msg}")
 
-                    # --- FEAR & GREED INDEX (FIXED ALIGNMENT) ---
+                    # Fear and Greed Index
                     elif action == "view_fear_greed":
                         t_title = "KORKU & AÇGÖZLÜLÜK ENDEKSİ" if current_lang == "tr" else "FEAR & GREED INDEX"
                         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
@@ -295,9 +296,7 @@ def main():
                         fng_data = market_service.get_fear_greed_data(current_lang)
                         MenuV2.draw_gauge(fng_data["current_value"], fng_data["current_status"])
 
-                        # HİZALAMA ÇÖZÜMÜ:
-                        # Verilerde renk kodu olduğu için karakter sayısı fazla görünüyor.
-                        # Başlığa da görünmez renk kodu (C.CYAN...C.END) ekleyerek uzunlukları eşitliyoruz.
+                        # Balance visual weight for alignment
                         if current_lang == "tr":
                             h_val = f"{C.CYAN}DEĞER{C.END}"
                             headers = ["DÖNEM", h_val, "DURUM"]
@@ -305,12 +304,12 @@ def main():
                             h_val = f"{C.CYAN}VALUE{C.END}"
                             headers = ["PERIOD", h_val, "STATUS"]
 
-                        widths = [15, 20, 25]  # Genişlikler ayarlandı
+                        widths = [15, 20, 25]
                         table_rows = []
 
                         for item in fng_data["history"]:
                             val = item['value']
-                            # Renklendirme mantığı
+                            # Color coding logic
                             if val < 45:
                                 val_str = f"{C.FAIL}{val}{C.END}"
                             elif val > 55:
@@ -326,6 +325,58 @@ def main():
 
                         MenuV2.draw_table(headers, table_rows, widths)
                         input(f"\n{ui_return_msg}")
+
+                    # Analysis tools
+                    elif action == "show_chart":
+                        t_title = "TRADINGVIEW GRAFİK" if current_lang == "tr" else "TRADINGVIEW CHART"
+                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+                        # 1. Fetch assets
+                        assets = market_service.get_all_assets()
+
+                        # 2. Draw selection menu (Pass current_lang for localization)
+                        MenuV2.draw_asset_selector(assets, current_lang)
+
+                        # 3. Input prompt
+                        p_msg = "Varlık Numarası Seçin (0-7): " if current_lang == "tr" else "Select Asset Number (0-7): "
+                        print(f"{ui_input_prefix}{p_msg}", end="")
+
+                        choice = input().strip()
+
+                        # 4. Validation
+                        if not choice.isdigit():
+                            err_msg = "Geçersiz giriş!" if current_lang == "tr" else "Invalid input!"
+                            print(f"\n   {C.FAIL}{err_msg}{C.END}")
+                            time.sleep(1)
+                            continue
+
+                        choice_idx = int(choice)
+
+                        # 5. Cancel logic
+                        if choice_idx == 0:
+                            continue
+
+                        # 6. Selection logic
+                        if 1 <= choice_idx <= len(assets):
+                            # Adjust index since list starts at 1
+                            selected_asset = assets[choice_idx - 1]
+                            target_symbol = selected_asset['symbol']
+
+                            # Loading effect
+                            load_msg = "Veriler yükleniyor..." if current_lang == "tr" else "Loading chart data..."
+                            print(f"\n   {C.WARNING}{load_msg}{C.END}")
+                            time.sleep(0.5)
+
+                            # Fetch and draw chart
+                            chart_data = market_service.get_chart_data(target_symbol)
+                            MenuV2.draw_simple_chart(target_symbol, chart_data)
+
+                            input(f"{ui_return_msg}")
+                        else:
+                            # Out of range error
+                            err_msg = "Varlık bulunamadı!" if current_lang == "tr" else "Asset not found!"
+                            print(f"\n   {C.FAIL}{err_msg}{C.END}")
+                            time.sleep(1)
 
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"], user_info=user_label)
@@ -347,7 +398,7 @@ def main():
                 else:
                     pass
 
-        # member mode logic
+        # Member mode logic
         else:
             Menu.draw_member_dashboard(current_lang, current_session)
             choice = input("Select: ").upper()

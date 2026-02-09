@@ -4,7 +4,7 @@ import os
 import sys
 
 
-# ansi color codes
+# ANSI color codes
 class C:
     CYAN = '\033[96m'
     WARNING = '\033[93m'
@@ -18,17 +18,17 @@ class C:
 class MenuV2:
     @staticmethod
     def clear_screen():
-        # clear terminal screen based on os
+        # Clear terminal screen based on OS
         os.system('cls' if os.name == 'nt' else 'clear')
-        # ansi escape code for ide support
+        # ANSI escape code for IDE support
         sys.stdout.write("\033[H\033[J")
 
     @staticmethod
     def draw_header(path_str, user_info):
-        # simple header
+        # Simple header
         print(f"\n 📍 CRYPTODASH > {path_str}")
         print("-" * 120)
-        # user_info is now dynamic (Guest or Misafir)
+        # User info is now dynamic
         print(f" 👤 {user_info:<90} 🌐 v2.0-dev")
         print("")
 
@@ -49,10 +49,10 @@ class MenuV2:
         separator_row = ""
 
         for key, val in menu_tree.items():
-            # color the number only
+            # Color the number only
             title = f"{C.WARNING}{key}.{C.END} {val['title']}"
 
-            # calculate padding
+            # Calculate padding
             visible_len = len(f"{key}. {val['title']}")
             padding = " " * (col_width - visible_len)
 
@@ -92,7 +92,7 @@ class MenuV2:
         print(f"   --- {menu_data['title']} ---\n")
 
         for key, val in menu_data['options'].items():
-            # color logic for buttons
+            # Color logic for buttons
             if val['action'] == "GO_BACK":
                 print(f"   [{C.FAIL}{key}{C.END}] {val['label']}")
             else:
@@ -107,38 +107,38 @@ class MenuV2:
         Supports automatic color coding for price changes.
         """
 
-        # 1. draw header row with cyan color
+        # 1. Draw header row
         header_str = "   "
         for i, h in enumerate(headers):
-            # headers are bold and cyan
+            # Headers are bold and cyan
             header_str += f"{C.BOLD}{C.CYAN}{h:<{col_widths[i]}}{C.END}"
 
         print(header_str)
-        # modern thin separator line
+        # Separator line
         print("   " + f"{C.GREY}{'─' * (sum(col_widths))}{C.END}")
 
-        # 2. draw data rows
+        # 2. Draw data rows
         for row in data:
             row_str = "   "
             for i, item in enumerate(row):
                 val_str = str(item)
                 color = C.END
 
-                # logic for coloring percentages and arrows
+                # Logic for coloring percentages and arrows
                 if "%" in val_str:
                     if "-" in val_str or "▼" in val_str:
-                        color = C.FAIL  # red
+                        color = C.FAIL  # Red
                     else:
-                        color = C.GREEN  # green
+                        color = C.GREEN  # Green
 
-                # highlight rank number in orange
+                # Highlight rank number in orange
                 if i == 0 and val_str.isdigit():
                     color = C.WARNING
 
                 row_str += f"{color}{val_str:<{col_widths[i]}}{C.END}"
             print(row_str)
 
-        # 3. bottom border
+        # 3. Bottom border
         print("   " + f"{C.GREY}{'─' * (sum(col_widths))}{C.END}")
         print("")
 
@@ -146,18 +146,17 @@ class MenuV2:
     def draw_gauge(value, label, width=50):
         """
         Draws a visual progress bar (gauge) for 0-100 values.
-        [||||||||||||||..........] 65 (Greed)
         """
         # Determine color based on value
         color = C.GREY
         if value < 25:
-            color = C.FAIL  # Red (Extreme Fear)
+            color = C.FAIL  # Red
         elif value < 45:
-            color = C.WARNING  # Orange (Fear)
+            color = C.WARNING  # Orange
         elif value < 55:
-            color = C.CYAN  # Blue (Neutral)
+            color = C.CYAN  # Blue
         else:
-            color = C.GREEN  # Green (Greed)
+            color = C.GREEN  # Green
 
         # Calculate filled portion
         filled_len = int(width * value // 100)
@@ -165,3 +164,56 @@ class MenuV2:
 
         print(f"\n   {C.BOLD}MARKET SENTIMENT: {color}{label.upper()}{C.END}")
         print(f"   {color}[{bar}] {value}/100{C.END}\n")
+
+    @staticmethod
+    def draw_simple_chart(symbol, prices):
+        """
+        Draws a simple horizontal bar chart for price history.
+        """
+        if not prices:
+            print("No data available.")
+            return
+
+        print(f"\n   {C.BOLD}{symbol} Price Action (Last 20){C.END}")
+        print(f"   {C.GREY}{'-' * 40}{C.END}")
+
+        min_p = min(prices)
+        max_p = max(prices)
+        diff = max_p - min_p
+
+        if diff == 0: diff = 1
+
+        for price in prices:
+            # Simple scaling logic
+            length = int((price - min_p) / diff * 30)
+            bar = "█" * length
+            if length == 0: bar = "▏"
+
+            print(f"   ${price:,.2f} | {C.CYAN}{bar}{C.END}")
+
+        print("")
+
+    @staticmethod
+    def draw_asset_selector(assets, lang="en"):
+        """
+        Displays a numbered list of assets for user selection.
+        """
+        # Localize headers based on lang param
+        if lang == "tr":
+            title = "MEVCUT VARLIKLAR"
+            txt_cancel = "İptal"
+        else:
+            title = "AVAILABLE ASSETS"
+            txt_cancel = "Cancel"
+
+        print(f"\n   {C.BOLD}{title}{C.END}")
+        print(f"   {C.GREY}{'-' * 40}{C.END}")
+
+        for i, asset in enumerate(assets, 1):
+            # Format: [1] BTC • Bitcoin
+            row = f"   [{C.WARNING}{i}{C.END}] {C.CYAN}{asset['symbol']}{C.END} • {asset['name']}"
+            print(row)
+
+        # Add Cancel/Back option
+        print(f"   [{C.FAIL}0{C.END}] {txt_cancel}")
+        print("")

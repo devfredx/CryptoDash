@@ -64,12 +64,12 @@ class MarketService:
 
     def get_fear_greed_data(self, lang="en"):
         """
-        Returns mock Fear & Greed Index data with localization.
+        returns mock fear and greed index data with localization
         """
-        # 0-100 Score
+        # score between 0 and 100
         current_score = 74
 
-        # Localization dictionary
+        # localization dictionary
         labels = {
             "en": {
                 "extreme_fear": "Extreme Fear",
@@ -91,7 +91,7 @@ class MarketService:
 
         txt = labels.get(lang, labels["en"])
 
-        # Helper to determine status label based on score
+        # helper to determine status label based on score
         def get_status(score):
             if score < 25: return txt["extreme_fear"]
             if score < 45: return txt["fear"]
@@ -99,7 +99,7 @@ class MarketService:
             if score < 75: return txt["greed"]
             return txt["extreme_greed"]
 
-        # Mock Historical Data
+        # mock historical data
         history = [
             {"period": txt["periods"][0], "value": current_score, "status": get_status(current_score)},
             {"period": txt["periods"][1], "value": 65, "status": txt["greed"]},
@@ -112,3 +112,30 @@ class MarketService:
             "current_status": get_status(current_score),
             "history": history
         }
+
+    def get_chart_data(self, symbol):
+        """
+        generates last 20 price data for simple chart
+        """
+        import random
+
+        # set base price based on symbol
+        base_price = 100.0
+        if symbol == "BTC":
+            base_price = 42500.0
+        elif symbol == "ETH":
+            base_price = 2300.0
+        elif symbol == "SOL":
+            base_price = 95.0
+
+        prices = []
+        current = base_price
+
+        # generate 20 data points to fit screen
+        for _ in range(20):
+            # fluctuates 2 percent up or down
+            change = random.uniform(-0.02, 0.02)
+            current = current * (1 + change)
+            prices.append(current)
+
+        return prices

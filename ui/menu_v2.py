@@ -217,3 +217,55 @@ class MenuV2:
         # Add Cancel/Back option
         print(f"   [{C.FAIL}0{C.END}] {txt_cancel}")
         print("")
+
+    @staticmethod
+    def draw_heatmap(data, lang="en"):
+        """
+        draws a 3x3 grid of boxes with color coded performance
+        """
+        if not data: return
+
+        # Localization Logic
+        if lang == "tr":
+            title = "PİYASA ISI HARİTASI (İLK 9)"
+        else:
+            title = "MARKET HEATMAP (TOP 9)"
+
+        print(f"\n   {C.BOLD}{title}{C.END}")
+
+        # split data into chunks of 3 for rows
+        rows = [data[i:i + 3] for i in range(0, len(data), 3)]
+
+        border = "+-------------+   "
+
+        for row_items in rows:
+            # top borders
+            print(f"   {border * len(row_items)}")
+
+            # symbol row
+            line_sym = "   "
+            for item in row_items:
+                sym = item['symbol']
+                line_sym += f"| {C.BOLD}{sym:<11}{C.END} |   "
+            print(line_sym)
+
+            # percent row
+            line_pct = "   "
+            for item in row_items:
+                chg = item['change']
+
+                # determine color
+                if chg > 0:
+                    color = C.GREEN
+                elif chg < 0:
+                    color = C.FAIL
+                else:
+                    color = C.GREY
+
+                pct_str = f"{chg:+.2f}%"
+                line_pct += f"| {color}{pct_str:^11}{C.END} |   "
+            print(line_pct)
+
+            # bottom borders
+            print(f"   {border * len(row_items)}")
+        print("")

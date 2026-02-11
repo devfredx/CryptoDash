@@ -331,19 +331,19 @@ def main():
                         t_title = "TRADINGVIEW GRAFİK" if current_lang == "tr" else "TRADINGVIEW CHART"
                         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
-                        # 1. Fetch assets
+                        # Fetch assets
                         assets = market_service.get_all_assets()
 
-                        # 2. Draw selection menu (Pass current_lang for localization)
+                        # Draw selection menu
                         MenuV2.draw_asset_selector(assets, current_lang)
 
-                        # 3. Input prompt
+                        # Input prompt
                         p_msg = "Varlık Numarası Seçin (0-7): " if current_lang == "tr" else "Select Asset Number (0-7): "
                         print(f"{ui_input_prefix}{p_msg}", end="")
 
                         choice = input().strip()
 
-                        # 4. Validation
+                        # Validation
                         if not choice.isdigit():
                             err_msg = "Geçersiz giriş!" if current_lang == "tr" else "Invalid input!"
                             print(f"\n   {C.FAIL}{err_msg}{C.END}")
@@ -352,11 +352,11 @@ def main():
 
                         choice_idx = int(choice)
 
-                        # 5. Cancel logic
+                        # Cancel logic
                         if choice_idx == 0:
                             continue
 
-                        # 6. Selection logic
+                        # Selection logic
                         if 1 <= choice_idx <= len(assets):
                             # Adjust index since list starts at 1
                             selected_asset = assets[choice_idx - 1]
@@ -378,10 +378,23 @@ def main():
                             print(f"\n   {C.FAIL}{err_msg}{C.END}")
                             time.sleep(1)
 
+                    # Heatmap visualization
+                    elif action == "heatmap" or action == "show_heatmap":
+                        t_title = "PİYASA ISI HARİTASI" if current_lang == "tr" else "MARKET HEATMAP"
+                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+                        # Fetch data
+                        heat_data = market_service.get_heatmap_data()
+
+                        # Draw grid
+                        MenuV2.draw_heatmap(heat_data, current_lang)
+
+                        input(f"\n{ui_return_msg}")
+
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"], user_info=user_label)
                         news = news_service.get_latest_news(current_lang)
-                        Menu.show_news(news)
+                        Menu.show_new(news)
                         input(f"\n{ui_return_msg}")
 
                     elif action == "faq":

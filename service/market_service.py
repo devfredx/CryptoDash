@@ -139,3 +139,21 @@ class MarketService:
             prices.append(current)
 
         return prices
+
+    def get_heatmap_data(self):
+        """
+        returns top 9 assets for a 3x3 grid display
+        """
+        # start with existing assets
+        data = self.assets[:]
+
+        # if we have less than 9 items fill with dummies for grid look
+        while len(data) < 9:
+            data.append({
+                "symbol": "MOCK",
+                "price": 1.0,
+                "change": 0.0
+            })
+
+        # return exactly 9 items
+        return data[:9]

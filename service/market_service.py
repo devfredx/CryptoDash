@@ -157,3 +157,62 @@ class MarketService:
 
         # return exactly 9 items
         return data[:9]
+
+    def get_onchain_data(self, symbol, lang="en"):
+        """
+        generates mock on chain analysis data for a specific asset
+        """
+        import random
+
+        # base values per asset
+        if symbol == "BTC":
+            inflow = 1250.5
+            outflow = 1840.2
+            active = 950000
+            conc = 12.5
+        elif symbol == "ETH":
+            inflow = 45000.0
+            outflow = 42000.0
+            active = 420000
+            conc = 35.2
+        else:
+            # random for others
+            inflow = random.uniform(1000, 5000)
+            outflow = random.uniform(1000, 5000)
+            active = int(random.uniform(5000, 50000))
+            conc = random.uniform(5, 60)
+
+        net_flow = outflow - inflow
+
+        # signals based on net flow
+        if lang == "tr":
+            signal = "YÜKSELİŞ (BULLISH)" if net_flow > 0 else "DÜŞÜŞ (BEARISH)"
+            txt_in = "Borsaya Giren"
+            txt_out = "Borsadan Çıkan"
+            txt_net = "Net Akış"
+            txt_addr = "Aktif Adres (24s)"
+            txt_whale = "Balina Konsantrasyonu"
+        else:
+            signal = "BULLISH" if net_flow > 0 else "BEARISH"
+            txt_in = "Exchange Inflow"
+            txt_out = "Exchange Outflow"
+            txt_net = "Net Flow"
+            txt_addr = "Active Addresses (24h)"
+            txt_whale = "Whale Concentration"
+
+        return {
+            "symbol": symbol,
+            "inflow": inflow,
+            "outflow": outflow,
+            "net_flow": net_flow,
+            "signal": signal,
+            "active_addresses": active,
+            "whale_conc": conc,
+            "labels": {
+                "in": txt_in,
+                "out": txt_out,
+                "net": txt_net,
+                "addr": txt_addr,
+                "whale": txt_whale
+            }
+        }

@@ -269,3 +269,48 @@ class MenuV2:
             # bottom borders
             print(f"   {border * len(row_items)}")
         print("")
+
+
+    @staticmethod
+    def draw_onchain_report(data):
+        """
+        renders a detailed on chain analysis card
+        """
+        if not data: return
+
+        lbl = data['labels']
+        sym = data['symbol']
+
+        # header
+        print(f"\n   {C.BOLD}ON-CHAIN ANALYSIS: {C.WARNING}{sym}{C.END}")
+        print(f"   {C.GREY}{'-' * 50}{C.END}")
+
+        # exchange flow visualizer
+        # calculate percentages for bar visual
+        total_vol = data['inflow'] + data['outflow']
+        if total_vol == 0: total_vol = 1
+
+        pct_in = int((data['inflow'] / total_vol) * 20)
+        pct_out = int((data['outflow'] / total_vol) * 20)
+
+        bar_in = f"{C.FAIL}{'<' * pct_in}{C.END}"
+        bar_out = f"{C.GREEN}{'>' * pct_out}{C.END}"
+
+        print(f"\n   {C.BOLD}{lbl['net'].upper()}{C.END}")
+        print(f"   {lbl['in']}: {C.FAIL}${data['inflow']:,.0f}{C.END}")
+        print(f"   {lbl['out']}: {C.GREEN}${data['outflow']:,.0f}{C.END}")
+
+        # the visual bar
+        print(f"   [{bar_in:^25}|{bar_out:^25}]")
+
+        # signal text
+        sig_color = C.GREEN if data['net_flow'] > 0 else C.FAIL
+        print(f"   SIGNAL: {sig_color}{data['signal']}{C.END}\n")
+
+        print(f"   {C.GREY}{'-' * 50}{C.END}")
+
+        # network stats
+        print(f"   {lbl['addr']}: {C.CYAN}{data['active_addresses']:,}{C.END}")
+        print(f"   {lbl['whale']}:  {C.WARNING}{data['whale_conc']:.1f}%{C.END}")
+
+        print("")

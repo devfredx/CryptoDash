@@ -379,7 +379,7 @@ def main():
                             time.sleep(1)
 
                     # Heatmap visualization
-                    elif action == "heatmap" or action == "show_heatmap":
+                    elif "heatmap" in action.lower():
                         t_title = "PİYASA ISI HARİTASI" if current_lang == "tr" else "MARKET HEATMAP"
                         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -391,10 +391,46 @@ def main():
 
                         input(f"\n{ui_return_msg}")
 
+
+                    elif "on_chain" in action.lower() or "onchain" in action.lower():
+                        t_title = "ZİNCİR ÜSTÜ ANALİZ" if current_lang == "tr" else "ON-CHAIN ANALYSIS"
+                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+                        # 1 select asset
+                        assets = market_service.get_all_assets()
+                        MenuV2.draw_asset_selector(assets, current_lang)
+
+                        p_msg = "Varlık Numarası Seçin (0-7): " if current_lang == "tr" else "Select Asset Number (0-7): "
+                        print(f"{ui_input_prefix}{p_msg}", end="")
+
+                        choice = input().strip()
+
+                        if choice.isdigit() and int(choice) > 0 and int(choice) <= len(assets):
+                            # get symbol
+                            selected_asset = assets[int(choice) - 1]
+                            target_symbol = selected_asset['symbol']
+
+                            # loading
+                            load_msg = "Blokzincir verileri taranıyor..." if current_lang == "tr" else "Scanning blockchain data..."
+                            print(f"\n   {C.WARNING}{load_msg}{C.END}")
+                            time.sleep(1)
+
+                            # 2 get data and draw
+                            onchain_data = market_service.get_onchain_data(target_symbol, current_lang)
+                            MenuV2.draw_onchain_report(onchain_data)
+
+                            input(f"{ui_return_msg}")
+                        else:
+                            # invalid or cancel
+                            if choice != "0":
+                                err = "Geçersiz seçim!" if current_lang == "tr" else "Invalid selection!"
+                                print(f"\n   {C.FAIL}{err}{C.END}")
+                                time.sleep(0.5)
+
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"], user_info=user_label)
                         news = news_service.get_latest_news(current_lang)
-                        Menu.show_new(news)
+                        Menu.show_news(news)  # DÜZELTME YAPILDI: show_new -> show_news
                         input(f"\n{ui_return_msg}")
 
                     elif action == "faq":

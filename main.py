@@ -15,16 +15,10 @@ from service.support_service import SupportService
 
 # V2 imports
 from ui.menu_map import get_guest_menu_structure
-from ui.menu_v2 import MenuV2, C
+from ui.menu_v2 import MenuV2
 
-
-# Helper function for number formatting
-def format_large_number(num):
-    if num >= 1_000_000_000:
-        return f"{num / 1_000_000_000:.1f}B"
-    elif num >= 1_000_000:
-        return f"{num / 1_000_000:.1f}M"
-    return str(num)
+# Controllers
+from controllers.market_controller import MarketController
 
 
 def main():
@@ -36,6 +30,9 @@ def main():
     trade_service = TradeService(market_service, user_repo)
     news_service = NewsService()
     support_service = SupportService()
+
+    # Initialize Controllers
+    market_controller = MarketController(market_service)
 
     # App state
     current_lang = "en"
@@ -120,7 +117,7 @@ def main():
                     action = selected_option.get("action")
                     label = selected_option.get("label")
 
-                    # Action handlers
+                    # --- CONTROLLER ROUTING LOGIC ---
 
                     # Navigation logic
                     if action and action.startswith("NAV_"):
@@ -156,10 +153,8 @@ def main():
                     elif action == "login":
                         t_title = "GİRİŞ" if current_lang == "tr" else "LOGIN"
                         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
-
                         prompt_u = "Kullanıcı Adı: " if current_lang == "tr" else "Username: "
                         prompt_p = "Şifre: " if current_lang == "tr" else "Password: "
-
                         u_name = input(prompt_u)
                         p_word = input(prompt_p)
                         user = auth_service.login(u_name, p_word)
@@ -174,263 +169,44 @@ def main():
                     elif action == "register":
                         t_title = "KAYIT" if current_lang == "tr" else "REGISTER"
                         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
-
                         prompt_u = "Yeni Kullanıcı Adı: " if current_lang == "tr" else "New Username: "
                         prompt_p = "Yeni Şifre: " if current_lang == "tr" else "New Password: "
-
                         u_name = input(prompt_u)
                         p_word = input(prompt_p)
                         success, msg = auth_service.register(u_name, p_word)
                         print(f"\n📢 {msg}")
                         input(f"\n{ui_return_msg}")
 
-                    # Market data features
+                    # --- MARKET CONTROLLER DELEGATION ---
                     elif action == "view_prices":
-                        title = "KRİPTO FİYATLARI" if current_lang == "tr" else "CRYPTO PRICES"
-                        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
-
-                        data = market_service.get_top_coins()
-
-                        if current_lang == "tr":
-                            headers = ["#", "VARLIK", "FİYAT", "24S %", "P. DEĞERİ", "HACİM (24S)"]
-                        else:
-                            headers = ["#", "ASSET", "PRICE", "24H %", "M. CAP", "VOL (24H)"]
-
-                        widths = [4, 16, 14, 12, 12, 12]
-                        table_rows = []
-
-                        for coin in data:
-                            change_val = coin['change']
-                            arrow = "▲" if change_val >= 0 else "▼"
-                            change_str = f"{arrow} {change_val}%"
-                            asset_str = f"{coin['symbol']} • {coin['name']}"
-
-                            row = [
-                                str(coin["rank"]),
-                                asset_str,
-                                f"${coin['price']:,.2f}",
-                                change_str,
-                                format_large_number(coin["mcap"]),
-                                format_large_number(coin["vol"])
-                            ]
-                            table_rows.append(row)
-
-                        MenuV2.draw_table(headers, table_rows, widths)
-                        input(f"\n{ui_return_msg}")
+                        market_controller.view_prices(current_lang, user_label, base_path)
 
                     elif action == "view_listings":
-                        title = "YENİ LİSTELEMELER" if current_lang == "tr" else "NEW LISTINGS"
-                        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
-
-                        data = market_service.get_new_listings()
-
-                        if current_lang == "tr":
-                            headers = ["Sembol", "İsim", "Fiyat", "Perf", "Tarih"]
-                        else:
-                            headers = ["Symbol", "Name", "Price", "Perf", "Date"]
-
-                        widths = [10, 15, 15, 15, 15]
-                        table_rows = []
-
-                        for coin in data:
-                            row = [coin["symbol"], coin["name"], f"${coin['price']}", f"{coin['change']}%",
-                                   coin["date"]]
-                            table_rows.append(row)
-
-                        MenuV2.draw_table(headers, table_rows, widths)
-                        input(f"\n{ui_return_msg}")
+                        market_controller.view_listings(current_lang, user_label, base_path)
 
                     elif action == "view_gainers":
-                        title = "KAZANANLAR & KAYBEDENLER" if current_lang == "tr" else "GAINERS & LOSERS"
-                        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
-                        gainers, losers = market_service.get_gainers_losers()
-
-                        t_gainers = "EN ÇOK KAZANANLAR" if current_lang == "tr" else "ROCKET GAINERS"
-                        t_losers = "EN ÇOK KAYBEDENLER" if current_lang == "tr" else "TOP LOSERS"
-
-                        print(f"   {C.GREEN}🚀 {t_gainers}{C.END}")
-                        for g in gainers:
-                            print(f"   • {g['symbol']:<10} {C.GREEN}+{g['change']}%{C.END} (${g['price']})")
-
-                        print(f"\n   {C.FAIL}📉 {t_losers}{C.END}")
-                        for l in losers:
-                            print(f"   • {l['symbol']:<10} {C.FAIL}{l['change']}%{C.END} (${l['price']})")
-
-                        input(f"\n\n{ui_return_msg}")
+                        market_controller.view_gainers(current_lang, user_label, base_path)
 
                     elif action == "view_sectors":
-                        title = "SEKTÖR PERFORMANSI" if current_lang == "tr" else "SECTOR PERFORMANCE"
-                        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
+                        market_controller.view_sectors(current_lang, user_label, base_path)
 
-                        sectors = market_service.get_sector_data(current_lang)
-
-                        if current_lang == "tr":
-                            headers = ["#", "SEKTÖR", "PERF (24S)", "P. DEĞERİ", "LİDER COIN"]
-                        else:
-                            headers = ["#", "SECTOR", "PERF (24H)", "M. CAP", "TOP TOKEN"]
-
-                        widths = [4, 22, 12, 12, 12]
-                        table_rows = []
-
-                        for s in sectors:
-                            arrow = "▲" if s['perf'] >= 0 else "▼"
-                            perf_str = f"{arrow} {s['perf']}%"
-
-                            row = [
-                                str(s['rank']),
-                                s['name'],
-                                perf_str,
-                                s['mcap'],
-                                s['top']
-                            ]
-                            table_rows.append(row)
-
-                        MenuV2.draw_table(headers, table_rows, widths)
-                        input(f"\n{ui_return_msg}")
-
-                    # Fear and Greed Index
                     elif action == "view_fear_greed":
-                        t_title = "KORKU & AÇGÖZLÜLÜK ENDEKSİ" if current_lang == "tr" else "FEAR & GREED INDEX"
-                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+                        market_controller.view_fear_greed(current_lang, user_label, base_path)
 
-                        fng_data = market_service.get_fear_greed_data(current_lang)
-                        MenuV2.draw_gauge(fng_data["current_value"], fng_data["current_status"])
-
-                        # Balance visual weight for alignment
-                        if current_lang == "tr":
-                            h_val = f"{C.CYAN}DEĞER{C.END}"
-                            headers = ["DÖNEM", h_val, "DURUM"]
-                        else:
-                            h_val = f"{C.CYAN}VALUE{C.END}"
-                            headers = ["PERIOD", h_val, "STATUS"]
-
-                        widths = [15, 20, 25]
-                        table_rows = []
-
-                        for item in fng_data["history"]:
-                            val = item['value']
-                            # Color coding logic
-                            if val < 45:
-                                val_str = f"{C.FAIL}{val}{C.END}"
-                            elif val > 55:
-                                val_str = f"{C.GREEN}{val}{C.END}"
-                            else:
-                                val_str = f"{C.CYAN}{val}{C.END}"
-
-                            table_rows.append([
-                                item['period'],
-                                val_str,
-                                item['status']
-                            ])
-
-                        MenuV2.draw_table(headers, table_rows, widths)
-                        input(f"\n{ui_return_msg}")
-
-                    # Analysis tools
                     elif action == "show_chart":
-                        t_title = "TRADINGVIEW GRAFİK" if current_lang == "tr" else "TRADINGVIEW CHART"
-                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+                        market_controller.show_chart(current_lang, user_label, base_path)
 
-                        # Fetch assets
-                        assets = market_service.get_all_assets()
-
-                        # Draw selection menu
-                        MenuV2.draw_asset_selector(assets, current_lang)
-
-                        # Input prompt
-                        p_msg = "Varlık Numarası Seçin (0-7): " if current_lang == "tr" else "Select Asset Number (0-7): "
-                        print(f"{ui_input_prefix}{p_msg}", end="")
-
-                        choice = input().strip()
-
-                        # Validation
-                        if not choice.isdigit():
-                            err_msg = "Geçersiz giriş!" if current_lang == "tr" else "Invalid input!"
-                            print(f"\n   {C.FAIL}{err_msg}{C.END}")
-                            time.sleep(1)
-                            continue
-
-                        choice_idx = int(choice)
-
-                        # Cancel logic
-                        if choice_idx == 0:
-                            continue
-
-                        # Selection logic
-                        if 1 <= choice_idx <= len(assets):
-                            # Adjust index since list starts at 1
-                            selected_asset = assets[choice_idx - 1]
-                            target_symbol = selected_asset['symbol']
-
-                            # Loading effect
-                            load_msg = "Veriler yükleniyor..." if current_lang == "tr" else "Loading chart data..."
-                            print(f"\n   {C.WARNING}{load_msg}{C.END}")
-                            time.sleep(0.5)
-
-                            # Fetch and draw chart
-                            chart_data = market_service.get_chart_data(target_symbol)
-                            MenuV2.draw_simple_chart(target_symbol, chart_data)
-
-                            input(f"{ui_return_msg}")
-                        else:
-                            # Out of range error
-                            err_msg = "Varlık bulunamadı!" if current_lang == "tr" else "Asset not found!"
-                            print(f"\n   {C.FAIL}{err_msg}{C.END}")
-                            time.sleep(1)
-
-                    # Heatmap visualization
                     elif "heatmap" in action.lower():
-                        t_title = "PİYASA ISI HARİTASI" if current_lang == "tr" else "MARKET HEATMAP"
-                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
-
-                        # Fetch data
-                        heat_data = market_service.get_heatmap_data()
-
-                        # Draw grid
-                        MenuV2.draw_heatmap(heat_data, current_lang)
-
-                        input(f"\n{ui_return_msg}")
-
+                        market_controller.show_heatmap(current_lang, user_label, base_path)
 
                     elif "on_chain" in action.lower() or "onchain" in action.lower():
-                        t_title = "ZİNCİR ÜSTÜ ANALİZ" if current_lang == "tr" else "ON-CHAIN ANALYSIS"
-                        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+                        market_controller.show_on_chain(current_lang, user_label, base_path)
 
-                        # 1 select asset
-                        assets = market_service.get_all_assets()
-                        MenuV2.draw_asset_selector(assets, current_lang)
-
-                        p_msg = "Varlık Numarası Seçin (0-7): " if current_lang == "tr" else "Select Asset Number (0-7): "
-                        print(f"{ui_input_prefix}{p_msg}", end="")
-
-                        choice = input().strip()
-
-                        if choice.isdigit() and int(choice) > 0 and int(choice) <= len(assets):
-                            # get symbol
-                            selected_asset = assets[int(choice) - 1]
-                            target_symbol = selected_asset['symbol']
-
-                            # loading
-                            load_msg = "Blokzincir verileri taranıyor..." if current_lang == "tr" else "Scanning blockchain data..."
-                            print(f"\n   {C.WARNING}{load_msg}{C.END}")
-                            time.sleep(1)
-
-                            # 2 get data and draw
-                            onchain_data = market_service.get_onchain_data(target_symbol, current_lang)
-                            MenuV2.draw_onchain_report(onchain_data)
-
-                            input(f"{ui_return_msg}")
-                        else:
-                            # invalid or cancel
-                            if choice != "0":
-                                err = "Geçersiz seçim!" if current_lang == "tr" else "Invalid selection!"
-                                print(f"\n   {C.FAIL}{err}{C.END}")
-                                time.sleep(0.5)
-
+                    # --- OTHER SERVICES ---
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"], user_info=user_label)
                         news = news_service.get_latest_news(current_lang)
-                        Menu.show_news(news)  # DÜZELTME YAPILDI: show_new -> show_news
+                        Menu.show_news(news)
                         input(f"\n{ui_return_msg}")
 
                     elif action == "faq":
@@ -451,11 +227,9 @@ def main():
         else:
             Menu.draw_member_dashboard(current_lang, current_session)
             choice = input("Select: ").upper()
-
             if choice == "O":
                 current_session = None
                 nav_state["mode"] = "dashboard"
-
             elif choice == "1":
                 MenuV2.prepare_content_screen(["MEMBER", "MARKETS"], user_info=user_label)
                 all_assets = market_service.get_all_assets()
@@ -464,7 +238,6 @@ def main():
             else:
                 print("Option not available in demo")
                 time.sleep(1)
-
 
 if __name__ == "__main__":
     main()

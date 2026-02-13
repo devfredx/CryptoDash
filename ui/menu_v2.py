@@ -41,9 +41,9 @@ class MenuV2:
     @staticmethod
     def draw_mega_dashboard(menu_tree, page_title="HOME", user_info="Guest", footer_text="[Select Column: 1-6]"):
         MenuV2.clear_screen()
-        # Header title is now dynamic
         MenuV2.draw_header(page_title, user_info)
 
+        # DÜZELTME: Sütun genişliği tekrar 20'ye düşürüldü (Eski kompakt görünüm)
         col_width = 20
         header_row = ""
         separator_row = ""
@@ -80,7 +80,6 @@ class MenuV2:
             print(f" {row_str}")
 
         print("\n" + "=" * 120)
-        # Footer text is now dynamic
         print(f" {footer_text}")
 
     @staticmethod
@@ -92,73 +91,57 @@ class MenuV2:
         print(f"   --- {menu_data['title']} ---\n")
 
         for key, val in menu_data['options'].items():
-            # Color logic for buttons
             if val['action'] == "GO_BACK":
                 print(f"   [{C.FAIL}{key}{C.END}] {val['label']}")
             else:
                 print(f"   [{C.WARNING}{key}{C.END}] {val['label']}")
-
         print("")
 
     @staticmethod
     def draw_table(headers, data, col_widths):
         """
-        Generic table drawer with modern alignment.
-        Supports automatic color coding for price changes.
+        Generic table drawer.
+        Note: Whale Alert uses wider columns via 'col_widths' parameter,
+        but this logic handles any width passed to it.
         """
-
-        # 1. Draw header row
         header_str = "   "
         for i, h in enumerate(headers):
-            # Headers are bold and cyan
             header_str += f"{C.BOLD}{C.CYAN}{h:<{col_widths[i]}}{C.END}"
 
         print(header_str)
-        # Separator line
         print("   " + f"{C.GREY}{'─' * (sum(col_widths))}{C.END}")
 
-        # 2. Draw data rows
         for row in data:
             row_str = "   "
             for i, item in enumerate(row):
                 val_str = str(item)
                 color = C.END
-
-                # Logic for coloring percentages and arrows
                 if "%" in val_str:
                     if "-" in val_str or "▼" in val_str:
-                        color = C.FAIL  # Red
+                        color = C.FAIL
                     else:
-                        color = C.GREEN  # Green
-
-                # Highlight rank number in orange
+                        color = C.GREEN
                 if i == 0 and val_str.isdigit():
                     color = C.WARNING
 
                 row_str += f"{color}{val_str:<{col_widths[i]}}{C.END}"
             print(row_str)
 
-        # 3. Bottom border
         print("   " + f"{C.GREY}{'─' * (sum(col_widths))}{C.END}")
         print("")
 
     @staticmethod
     def draw_gauge(value, label, width=50):
-        """
-        Draws a visual progress bar (gauge) for 0-100 values.
-        """
-        # Determine color based on value
         color = C.GREY
         if value < 25:
-            color = C.FAIL  # Red
+            color = C.FAIL
         elif value < 45:
-            color = C.WARNING  # Orange
+            color = C.WARNING
         elif value < 55:
-            color = C.CYAN  # Blue
+            color = C.CYAN
         else:
-            color = C.GREEN  # Green
+            color = C.GREEN
 
-        # Calculate filled portion
         filled_len = int(width * value // 100)
         bar = '█' * filled_len + '-' * (width - filled_len)
 
@@ -166,10 +149,26 @@ class MenuV2:
         print(f"   {color}[{bar}] {value}/100{C.END}\n")
 
     @staticmethod
+    def draw_asset_selector(assets, lang="en"):
+        if lang == "tr":
+            title = "MEVCUT VARLIKLAR"
+            txt_cancel = "İptal"
+        else:
+            title = "AVAILABLE ASSETS"
+            txt_cancel = "Cancel"
+
+        print(f"\n   {C.BOLD}{title}{C.END}")
+        print(f"   {C.GREY}{'-' * 40}{C.END}")
+
+        for i, asset in enumerate(assets, 1):
+            row = f"   [{C.WARNING}{i}{C.END}] {C.CYAN}{asset['symbol']}{C.END} • {asset['name']}"
+            print(row)
+
+        print(f"   [{C.FAIL}0{C.END}] {txt_cancel}")
+        print("")
+
+    @staticmethod
     def draw_simple_chart(symbol, prices):
-        """
-        Draws a simple horizontal bar chart for price history.
-        """
         if not prices:
             print("No data available.")
             return
@@ -184,48 +183,16 @@ class MenuV2:
         if diff == 0: diff = 1
 
         for price in prices:
-            # Simple scaling logic
             length = int((price - min_p) / diff * 30)
             bar = "█" * length
             if length == 0: bar = "▏"
-
             print(f"   ${price:,.2f} | {C.CYAN}{bar}{C.END}")
-
-        print("")
-
-    @staticmethod
-    def draw_asset_selector(assets, lang="en"):
-        """
-        Displays a numbered list of assets for user selection.
-        """
-        # Localize headers based on lang param
-        if lang == "tr":
-            title = "MEVCUT VARLIKLAR"
-            txt_cancel = "İptal"
-        else:
-            title = "AVAILABLE ASSETS"
-            txt_cancel = "Cancel"
-
-        print(f"\n   {C.BOLD}{title}{C.END}")
-        print(f"   {C.GREY}{'-' * 40}{C.END}")
-
-        for i, asset in enumerate(assets, 1):
-            # Format: [1] BTC • Bitcoin
-            row = f"   [{C.WARNING}{i}{C.END}] {C.CYAN}{asset['symbol']}{C.END} • {asset['name']}"
-            print(row)
-
-        # Add Cancel/Back option
-        print(f"   [{C.FAIL}0{C.END}] {txt_cancel}")
         print("")
 
     @staticmethod
     def draw_heatmap(data, lang="en"):
-        """
-        draws a 3x3 grid of boxes with color coded performance
-        """
         if not data: return
 
-        # Localization Logic
         if lang == "tr":
             title = "PİYASA ISI HARİTASI (İLK 9)"
         else:
@@ -233,60 +200,42 @@ class MenuV2:
 
         print(f"\n   {C.BOLD}{title}{C.END}")
 
-        # split data into chunks of 3 for rows
         rows = [data[i:i + 3] for i in range(0, len(data), 3)]
-
         border = "+-------------+   "
 
         for row_items in rows:
-            # top borders
             print(f"   {border * len(row_items)}")
-
-            # symbol row
             line_sym = "   "
             for item in row_items:
                 sym = item['symbol']
                 line_sym += f"| {C.BOLD}{sym:<11}{C.END} |   "
             print(line_sym)
 
-            # percent row
             line_pct = "   "
             for item in row_items:
                 chg = item['change']
-
-                # determine color
                 if chg > 0:
                     color = C.GREEN
                 elif chg < 0:
                     color = C.FAIL
                 else:
                     color = C.GREY
-
                 pct_str = f"{chg:+.2f}%"
                 line_pct += f"| {color}{pct_str:^11}{C.END} |   "
             print(line_pct)
-
-            # bottom borders
             print(f"   {border * len(row_items)}")
         print("")
 
-
     @staticmethod
     def draw_onchain_report(data):
-        """
-        renders a detailed on chain analysis card
-        """
         if not data: return
 
         lbl = data['labels']
         sym = data['symbol']
 
-        # header
         print(f"\n   {C.BOLD}ON-CHAIN ANALYSIS: {C.WARNING}{sym}{C.END}")
         print(f"   {C.GREY}{'-' * 50}{C.END}")
 
-        # exchange flow visualizer
-        # calculate percentages for bar visual
         total_vol = data['inflow'] + data['outflow']
         if total_vol == 0: total_vol = 1
 
@@ -300,17 +249,13 @@ class MenuV2:
         print(f"   {lbl['in']}: {C.FAIL}${data['inflow']:,.0f}{C.END}")
         print(f"   {lbl['out']}: {C.GREEN}${data['outflow']:,.0f}{C.END}")
 
-        # the visual bar
         print(f"   [{bar_in:^25}|{bar_out:^25}]")
 
-        # signal text
         sig_color = C.GREEN if data['net_flow'] > 0 else C.FAIL
         print(f"   SIGNAL: {sig_color}{data['signal']}{C.END}\n")
 
         print(f"   {C.GREY}{'-' * 50}{C.END}")
 
-        # network stats
         print(f"   {lbl['addr']}: {C.CYAN}{data['active_addresses']:,}{C.END}")
         print(f"   {lbl['whale']}:  {C.WARNING}{data['whale_conc']:.1f}%{C.END}")
-
         print("")

@@ -63,13 +63,7 @@ class MarketService:
         return self.assets
 
     def get_fear_greed_data(self, lang="en"):
-        """
-        returns mock fear and greed index data with localization
-        """
-        # score between 0 and 100
         current_score = 74
-
-        # localization dictionary
         labels = {
             "en": {
                 "extreme_fear": "Extreme Fear",
@@ -88,10 +82,8 @@ class MarketService:
                 "periods": ["Şimdi", "Dün", "Geçen Hafta", "Geçen Ay"]
             }
         }
-
         txt = labels.get(lang, labels["en"])
 
-        # helper to determine status label based on score
         def get_status(score):
             if score < 25: return txt["extreme_fear"]
             if score < 45: return txt["fear"]
@@ -99,14 +91,12 @@ class MarketService:
             if score < 75: return txt["greed"]
             return txt["extreme_greed"]
 
-        # mock historical data
         history = [
             {"period": txt["periods"][0], "value": current_score, "status": get_status(current_score)},
             {"period": txt["periods"][1], "value": 65, "status": txt["greed"]},
             {"period": txt["periods"][2], "value": 45, "status": txt["neutral"]},
             {"period": txt["periods"][3], "value": 20, "status": txt["extreme_fear"]},
         ]
-
         return {
             "current_value": current_score,
             "current_status": get_status(current_score),
@@ -114,12 +104,7 @@ class MarketService:
         }
 
     def get_chart_data(self, symbol):
-        """
-        generates last 20 price data for simple chart
-        """
         import random
-
-        # set base price based on symbol
         base_price = 100.0
         if symbol == "BTC":
             base_price = 42500.0
@@ -127,44 +112,22 @@ class MarketService:
             base_price = 2300.0
         elif symbol == "SOL":
             base_price = 95.0
-
         prices = []
         current = base_price
-
-        # generate 20 data points to fit screen
         for _ in range(20):
-            # fluctuates 2 percent up or down
             change = random.uniform(-0.02, 0.02)
             current = current * (1 + change)
             prices.append(current)
-
         return prices
 
     def get_heatmap_data(self):
-        """
-        returns top 9 assets for a 3x3 grid display
-        """
-        # start with existing assets
         data = self.assets[:]
-
-        # if we have less than 9 items fill with dummies for grid look
         while len(data) < 9:
-            data.append({
-                "symbol": "MOCK",
-                "price": 1.0,
-                "change": 0.0
-            })
-
-        # return exactly 9 items
+            data.append({"symbol": "MOCK", "price": 1.0, "change": 0.0})
         return data[:9]
 
     def get_onchain_data(self, symbol, lang="en"):
-        """
-        generates mock on chain analysis data for a specific asset
-        """
         import random
-
-        # base values per asset
         if symbol == "BTC":
             inflow = 1250.5
             outflow = 1840.2
@@ -176,15 +139,12 @@ class MarketService:
             active = 420000
             conc = 35.2
         else:
-            # random for others
             inflow = random.uniform(1000, 5000)
             outflow = random.uniform(1000, 5000)
             active = int(random.uniform(5000, 50000))
             conc = random.uniform(5, 60)
 
         net_flow = outflow - inflow
-
-        # signals based on net flow
         if lang == "tr":
             signal = "YÜKSELİŞ (BULLISH)" if net_flow > 0 else "DÜŞÜŞ (BEARISH)"
             txt_in = "Borsaya Giren"
@@ -216,3 +176,54 @@ class MarketService:
                 "whale": txt_whale
             }
         }
+
+    # GÜNCELLENEN METOD BURASI (Whale Alert için dil desteği eklendi)
+    def get_whale_alerts(self, lang="en"):
+        import random
+
+        # Localize platforms and time suffix
+        if lang == "tr":
+            platforms = ["Binance", "Coinbase", "Kraken", "Bilinmeyen Cüzdan", "Soğuk Cüzdan", "OKX"]
+            suffix = "dk önce"
+        else:
+            platforms = ["Binance", "Coinbase", "Kraken", "Unknown Wallet", "Cold Storage", "OKX"]
+            suffix = "m ago"
+
+        assets = [
+            {"sym": "BTC", "price": 43250},
+            {"sym": "ETH", "price": 2340},
+            {"sym": "SOL", "price": 98},
+            {"sym": "XRP", "price": 0.55}
+        ]
+
+        alerts = []
+        for _ in range(8):
+            asset = random.choice(assets)
+            if asset["sym"] == "BTC":
+                amount = random.randint(50, 5000)
+            elif asset["sym"] == "ETH":
+                amount = random.randint(1000, 50000)
+            else:
+                amount = random.randint(500000, 10000000)
+
+            val = amount * asset["price"]
+
+            src = random.choice(platforms)
+            dest = random.choice(platforms)
+            while src == dest:
+                dest = random.choice(platforms)
+
+            mins = random.randint(1, 59)
+            time_str = f"{mins}{suffix}"
+
+            alerts.append({
+                "symbol": asset["sym"],
+                "amount": amount,
+                "value": val,
+                "from": src,
+                "to": dest,
+                "time": time_str
+            })
+
+        alerts.sort(key=lambda x: x["value"], reverse=True)
+        return alerts

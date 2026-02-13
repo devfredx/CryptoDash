@@ -1,3 +1,5 @@
+# controllers/market_controller.py
+
 import time
 from ui.menu_v2 import MenuV2, C
 
@@ -237,3 +239,54 @@ class MarketController:
             if choice != "0":
                 print(f"\n   {C.FAIL}{ui['invalid']}{C.END}")
                 time.sleep(0.5)
+
+    def show_whale_alerts(self, current_lang, user_label, base_path):
+        t_title = "BALİNA ALARMLARI" if current_lang == "tr" else "WHALE ALERTS"
+        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+        ui = self._get_ui_strings(current_lang)
+        # GÜNCELLEME: Artık dili servise gönderiyoruz
+        data = self.market_service.get_whale_alerts(current_lang)
+
+        if current_lang == "tr":
+            headers = ["COIN", "MİKTAR", "DEĞER (USD)", "KAYNAK -> HEDEF", "ZAMAN"]
+        else:
+            headers = ["ASSET", "AMOUNT", "VALUE (USD)", "FROM -> TO", "TIME"]
+
+        widths = [8, 15, 18, 35, 12]
+        table_rows = []
+
+        for item in data:
+            val_str = f"${self._format_large_number(item['value'])}"
+
+            # Translate specific hardcoded exchange names if needed,
+            # though usually names like Binance/Coinbase are universal.
+            # Just handling the flow visualization.
+
+            # Since platforms are now localized in service, we just check against known exchange names
+            # Note: "Bilinmeyen Cüzdan" won't match "Unknown Wallet" logic below unless we add it
+            exchanges = ["Binance", "Coinbase", "Kraken", "OKX"]
+
+            if item["to"] in exchanges:
+                icon = "🚨"
+                flow = f"{item['from']} -> {C.FAIL}{item['to']}{C.END}"
+            elif item["from"] in exchanges:
+                icon = "🐋"
+                flow = f"{C.WARNING}{item['from']}{C.END} -> {item['to']}"
+            else:
+                icon = "⇄"
+                flow = f"{item['from']} -> {item['to']}"
+
+            asset_display = f"{icon} {item['symbol']}"
+
+            row = [
+                asset_display,
+                f"{item['amount']:,}",
+                val_str,
+                flow,
+                item['time']
+            ]
+            table_rows.append(row)
+
+        MenuV2.draw_table(headers, table_rows, widths)
+        input(f"\n{ui['return_msg']}")

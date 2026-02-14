@@ -2,7 +2,7 @@
 
 class MarketService:
     def __init__(self):
-        # 1. VARLIK LİSTESİ (SABİT)
+        # Fixed asset list
         self.assets = [
             {"rank": 1, "symbol": "BTC", "name": "Bitcoin", "price": 52150.0, "change": 2.4, "vol": 35000000000,
              "mcap": 980000000000},
@@ -41,7 +41,7 @@ class MarketService:
         ]
 
     def get_gainers_losers(self):
-        # Sabit sıralama
+        # Fixed sorting based on change
         sorted_assets = sorted(self.assets, key=lambda x: x['change'], reverse=True)
         gainers = sorted_assets[:3]
         losers = sorted_assets[-3:]
@@ -73,7 +73,7 @@ class MarketService:
         return self.assets
 
     def get_fear_greed_data(self, lang="en"):
-        # Sabit veri
+        # Fixed data for simulation
         current_score = 74
         labels = {
             "en": {"greed": "Greed", "neutral": "Neutral", "extreme_fear": "Extreme Fear",
@@ -97,7 +97,7 @@ class MarketService:
 
     def get_chart_data(self, symbol):
         """
-        Returns fixed pattern chart data for stability.
+        Returns fixed pattern chart data for stability
         """
         base_price = 100.0
         for asset in self.assets:
@@ -105,8 +105,7 @@ class MarketService:
                 base_price = asset['price']
                 break
 
-        # Sabit bir dalgalanma deseni (Random yok)
-        # %1 yukarı, %0.5 aşağı gibi sabit bir pattern
+        # Fixed pattern calculation
         multipliers = [1.0, 1.01, 1.02, 1.015, 1.03, 1.025, 1.04, 1.035, 1.05, 1.045,
                        1.06, 1.055, 1.07, 1.06, 1.05, 1.04, 1.03, 1.035, 1.04, 1.05]
 
@@ -118,7 +117,7 @@ class MarketService:
         return data[:9]
 
     def get_onchain_data(self, symbol, lang="en"):
-        # Tamamen sabit on-chain verileri
+        # Completely fixed onchain data
         if symbol == "BTC":
             inflow, outflow, active, conc, net = 12500, 18400, 950000, 12.5, 5900
         elif symbol == "ETH":
@@ -148,7 +147,7 @@ class MarketService:
 
     def get_whale_alerts(self, lang="en"):
         """
-        Returns a FIXED list of alerts. No random generation.
+        Returns a fixed list of alerts without random generation
         """
         if lang == "tr":
             suffix = "dk önce"
@@ -159,7 +158,7 @@ class MarketService:
             w_unknown = "Unknown Wallet"
             w_cold = "Cold Storage"
 
-        # Sabit liste - Her açışta aynı görünür
+        # Fixed list appears the same every time
         return [
             {"symbol": "BTC", "amount": 150, "value": 7822500, "from": w_unknown, "to": "Binance",
              "time": f"5{suffix}"},
@@ -180,7 +179,7 @@ class MarketService:
 
     def get_gas_data(self, lang="en"):
         """
-        Returns FIXED gas fee data. No random volatility.
+        Returns fixed gas fee data without random volatility
         """
         if lang == "tr":
             s_low, s_avg, s_high = "DÜŞÜK", "ORTA", "YÜKSEK"
@@ -189,7 +188,7 @@ class MarketService:
             s_low, s_avg, s_high = "LOW", "AVERAGE", "HIGH"
             code_low, code_avg, code_high = "LOW", "AVG", "HIGH"
 
-        # Tamamen elle girilmiş, mantıklı ve sabit veriler
+        # Manually entered fixed data
         return [
             {"network": "Ethereum", "gwei": 45, "transfer": 6.50, "swap": 35.20, "status": s_high,
              "status_code": code_high},
@@ -210,3 +209,57 @@ class MarketService:
              "status_code": code_avg},
             {"network": "Solana", "gwei": 15, "transfer": 0.00, "swap": 0.00, "status": s_low, "status_code": code_low},
         ]
+
+    def get_economic_calendar(self, lang="en"):
+        """
+        Generates mock economic calendar events
+        """
+        # Localized texts
+        if lang == "tr":
+            impact_labels = {"high": "YÜKSEK", "med": "ORTA", "low": "DÜŞÜK"}
+            events = [
+                {"time": "15:30", "currency": "USD", "event": "Tüketici Fiyat Endeksi (TÜFE) - Yıllık",
+                 "impact": "high", "prev": "3.4%", "forecast": "3.2%"},
+                {"time": "15:30", "currency": "USD", "event": "Tarım Dışı İstihdam (NFP)", "impact": "high",
+                 "prev": "216K", "forecast": "180K"},
+                {"time": "21:00", "currency": "USD", "event": "Fed Faiz Kararı", "impact": "high", "prev": "5.50%",
+                 "forecast": "5.50%"},
+                {"time": "21:30", "currency": "USD", "event": "FOMC Basın Toplantısı", "impact": "high", "prev": "-",
+                 "forecast": "-"},
+                {"time": "12:00", "currency": "EUR", "event": "Euro Bölgesi TÜFE (Yıllık)", "impact": "med",
+                 "prev": "2.9%", "forecast": "2.8%"},
+                {"time": "16:45", "currency": "USD", "event": "Hizmet PMI Verisi", "impact": "med", "prev": "51.4",
+                 "forecast": "52.0%"},
+                {"time": "17:30", "currency": "USD", "event": "Ham Petrol Stokları", "impact": "low", "prev": "-2.5M",
+                 "forecast": "-1.0M"},
+                {"time": "09:00", "currency": "GBP", "event": "GSYİH (GDP) Büyüme Oranı", "impact": "med",
+                 "prev": "0.1%", "forecast": "0.0%"},
+            ]
+        else:
+            impact_labels = {"high": "HIGH", "med": "MEDIUM", "low": "LOW"}
+            events = [
+                {"time": "15:30", "currency": "USD", "event": "Core CPI (YoY)", "impact": "high", "prev": "3.4%",
+                 "forecast": "3.2%"},
+                {"time": "15:30", "currency": "USD", "event": "Non-Farm Payrolls", "impact": "high", "prev": "216K",
+                 "forecast": "180K"},
+                {"time": "21:00", "currency": "USD", "event": "Fed Interest Rate Decision", "impact": "high",
+                 "prev": "5.50%", "forecast": "5.50%"},
+                {"time": "21:30", "currency": "USD", "event": "FOMC Press Conference", "impact": "high", "prev": "-",
+                 "forecast": "-"},
+                {"time": "12:00", "currency": "EUR", "event": "Eurozone CPI (YoY)", "impact": "med", "prev": "2.9%",
+                 "forecast": "2.8%"},
+                {"time": "16:45", "currency": "USD", "event": "Services PMI", "impact": "med", "prev": "51.4",
+                 "forecast": "52.0%"},
+                {"time": "17:30", "currency": "USD", "event": "Crude Oil Inventories", "impact": "low", "prev": "-2.5M",
+                 "forecast": "-1.0M"},
+                {"time": "09:00", "currency": "GBP", "event": "GDP Growth Rate", "impact": "med", "prev": "0.1%",
+                 "forecast": "0.0%"},
+            ]
+
+        # Add localized impact label to data
+        processed_data = []
+        for item in events:
+            item["impact_label"] = impact_labels[item["impact"]]
+            processed_data.append(item)
+
+        return processed_data

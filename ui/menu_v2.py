@@ -25,10 +25,10 @@ class MenuV2:
 
     @staticmethod
     def draw_header(path_str, user_info):
-        # Simple header
+        # Print simple header
         print(f"\n 📍 CRYPTODASH > {path_str}")
         print("-" * 120)
-        # User info is now dynamic
+        # Display dynamic user info
         print(f" 👤 {user_info:<90} 🌐 v2.0-dev")
         print("")
 
@@ -43,7 +43,7 @@ class MenuV2:
         MenuV2.clear_screen()
         MenuV2.draw_header(page_title, user_info)
 
-        # DÜZELTME: Sütun genişliği tekrar 20'ye düşürüldü (Eski kompakt görünüm)
+        # Set column width back to 20 for compact view
         col_width = 20
         header_row = ""
         separator_row = ""
@@ -52,7 +52,7 @@ class MenuV2:
             # Color the number only
             title = f"{C.WARNING}{key}.{C.END} {val['title']}"
 
-            # Calculate padding
+            # Calculate padding based on width
             visible_len = len(f"{key}. {val['title']}")
             padding = " " * (col_width - visible_len)
 
@@ -99,11 +99,7 @@ class MenuV2:
 
     @staticmethod
     def draw_table(headers, data, col_widths):
-        """
-        Generic table drawer.
-        Note: Whale Alert uses wider columns via 'col_widths' parameter,
-        but this logic handles any width passed to it.
-        """
+        # Draw generic table with flexible column widths
         header_str = "   "
         for i, h in enumerate(headers):
             header_str += f"{C.BOLD}{C.CYAN}{h:<{col_widths[i]}}{C.END}"

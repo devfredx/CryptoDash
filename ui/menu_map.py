@@ -1,7 +1,7 @@
 # ui/menu_map.py
 
 def get_guest_menu_structure(lang="en"):
-    # define labels
+    # define labels based on language
     labels = {
         "en": {
             # dashboard headers
@@ -18,7 +18,7 @@ def get_guest_menu_structure(lang="en"):
             "m3_cats": ["News", "Announcements", "Research", "Reports", "Academy"],
             "m4_cats": ["About Us", "Team", "Partners", "Sitemap"],
             "m5_cats": ["FAQ", "Contact", "Fees", "Risk Notice"],
-            # column 6 has emojis
+            # column 6 items
             "m6_cats": ["🔍 Search", "🌐 Language", "🔑 Login", "📝 Register"],
 
             # level 3 detailed items
@@ -47,7 +47,7 @@ def get_guest_menu_structure(lang="en"):
             "m3_cats": ["Haberler", "Duyurular", "Araştırmalar", "Raporlar", "Akademi"],
             "m4_cats": ["Hakkımızda", "Yönetim Ekibi", "İş Ortakları", "Site Haritası"],
             "m5_cats": ["SSS", "İletişim", "Ücretler", "Risk Bildirimi"],
-            # column 6 has emojis
+            # column 6 items
             "m6_cats": ["🔍 Arama", "🌐 Dil", "🔑 Giriş", "📝 Kayıt"],
 
             "md_items": ["Kripto Fiyatları", "Yeni Listelenenler", "Kazananlar/Kaybedenler", "Sektörler (DeFi/AI)", "Korku & Açgözlülük"],
@@ -66,17 +66,17 @@ def get_guest_menu_structure(lang="en"):
 
     txt = labels.get(lang, labels["en"])
 
-    # mega menu tree
-    menu_tree = {
+    # mega menu tree structure
+    mega_menu = {
         "1": {"title": txt["m1"], "goto": "markets", "preview": txt["m1_cats"]},
-        "2": {"title": txt["m2"], "goto": "trade",   "preview": txt["m2_cats"]},
+        "2": {"title": txt["m2"], "goto": "trade",    "preview": txt["m2_cats"]},
         "3": {"title": txt["m3"], "goto": "discover", "preview": txt["m3_cats"]},
         "4": {"title": txt["m4"], "goto": "company",  "preview": txt["m4_cats"]},
         "5": {"title": txt["m5"], "goto": "support",  "preview": txt["m5_cats"]},
         "6": {"title": txt["m6"], "goto": "account",  "preview": txt["m6_cats"]}
     }
 
-    # sub menus
+    # sub menus configuration
     sub_menus = {
         # level 2 router menus
         "markets": {
@@ -124,7 +124,7 @@ def get_guest_menu_structure(lang="en"):
         "market_calendar": {
             "title": txt["m1_cats"][2].upper(),
             "options": {
-                "1": {"label": txt["mc_items"][0], "action": "show_eco_cal"},
+                "1": {"label": txt["mc_items"][0], "action": "view_calendar"},
                 "2": {"label": txt["mc_items"][1], "action": "show_ico"},
                 "3": {"label": txt["mc_items"][2], "action": "show_unlocks"},
                 "0": {"label": txt["back"], "action": "GO_BACK"}
@@ -218,4 +218,4 @@ def get_guest_menu_structure(lang="en"):
         }
     }
 
-    return menu_tree, sub_menus
+    return mega_menu, sub_menus

@@ -3,21 +3,18 @@
 import time
 from ui.menu_v2 import MenuV2, C
 
-
 class MarketController:
     def __init__(self, market_service):
         self.market_service = market_service
 
     def _get_ui_strings(self, lang):
-        """
-        Helper to get common UI strings based on language.
-        """
+        # helper to get common ui strings based on language
         if lang == "tr":
             return {
                 "return_msg": "Geri dönmek için Enter...",
                 "input_prefix": "    > ",
                 "load_msg": "Veriler yükleniyor...",
-                "select_asset": "Varlık Numarası Seçin (0-7): ",
+                "select_asset": "Varlık Numarası Seçin (0-12): ",
                 "invalid": "Geçersiz giriş!",
                 "scan": "Blokzincir verileri taranıyor...",
                 "not_found": "Varlık bulunamadı!"
@@ -27,13 +24,14 @@ class MarketController:
                 "return_msg": "Enter to return...",
                 "input_prefix": "    > ",
                 "load_msg": "Loading chart data...",
-                "select_asset": "Select Asset Number (0-7): ",
+                "select_asset": "Select Asset Number (0-12): ",
                 "invalid": "Invalid input!",
                 "scan": "Scanning blockchain data...",
                 "not_found": "Asset not found!"
             }
 
     def _format_large_number(self, num):
+        # formats large integers into readable strings like 1b or 1m
         if num >= 1_000_000_000:
             return f"{num / 1_000_000_000:.1f}B"
         elif num >= 1_000_000:
@@ -41,6 +39,7 @@ class MarketController:
         return str(num)
 
     def view_prices(self, current_lang, user_label, base_path):
+        # displays live crypto price table
         title = "KRİPTO FİYATLARI" if current_lang == "tr" else "CRYPTO PRICES"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -75,6 +74,7 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def view_listings(self, current_lang, user_label, base_path):
+        # displays new asset listings
         title = "YENİ LİSTELEMELER" if current_lang == "tr" else "NEW LISTINGS"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -97,6 +97,7 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def view_gainers(self, current_lang, user_label, base_path):
+        # displays top gainers and losers
         title = "KAZANANLAR & KAYBEDENLER" if current_lang == "tr" else "GAINERS & LOSERS"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -117,6 +118,7 @@ class MarketController:
         input(f"\n\n{ui['return_msg']}")
 
     def view_sectors(self, current_lang, user_label, base_path):
+        # displays performance by market sectors
         title = "SEKTÖR PERFORMANSI" if current_lang == "tr" else "SECTOR PERFORMANCE"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -141,6 +143,7 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def view_fear_greed(self, current_lang, user_label, base_path):
+        # shows fear and greed index gauge and history
         t_title = "KORKU & AÇGÖZLÜLÜK ENDEKSİ" if current_lang == "tr" else "FEAR & GREED INDEX"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -173,6 +176,7 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def show_chart(self, current_lang, user_label, base_path):
+        # allows user to select an asset and view its price chart
         t_title = "TRADINGVIEW GRAFİK" if current_lang == "tr" else "TRADINGVIEW CHART"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -206,6 +210,7 @@ class MarketController:
             time.sleep(1)
 
     def show_heatmap(self, current_lang, user_label, base_path):
+        # displays a visual grid of market performance
         t_title = "PİYASA ISI HARİTASI" if current_lang == "tr" else "MARKET HEATMAP"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -215,6 +220,7 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def show_on_chain(self, current_lang, user_label, base_path):
+        # displays blockchain specific data for a chosen asset
         t_title = "ZİNCİR ÜSTÜ ANALİZ" if current_lang == "tr" else "ON-CHAIN ANALYSIS"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -225,7 +231,7 @@ class MarketController:
         print(f"{ui['input_prefix']}{ui['select_asset']}", end="")
         choice = input().strip()
 
-        if choice.isdigit() and int(choice) > 0 and int(choice) <= len(assets):
+        if  choice.isdigit() and int(choice) > 0 and int(choice) <= len(assets):
             selected_asset = assets[int(choice) - 1]
             target_symbol = selected_asset['symbol']
 
@@ -241,11 +247,11 @@ class MarketController:
                 time.sleep(0.5)
 
     def show_whale_alerts(self, current_lang, user_label, base_path):
+        # displays large transaction alerts
         t_title = "BALİNA ALARMLARI" if current_lang == "tr" else "WHALE ALERTS"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
         ui = self._get_ui_strings(current_lang)
-        # GÜNCELLEME: Artık dili servise gönderiyoruz
         data = self.market_service.get_whale_alerts(current_lang)
 
         if current_lang == "tr":
@@ -258,13 +264,6 @@ class MarketController:
 
         for item in data:
             val_str = f"${self._format_large_number(item['value'])}"
-
-            # Translate specific hardcoded exchange names if needed,
-            # though usually names like Binance/Coinbase are universal.
-            # Just handling the flow visualization.
-
-            # Since platforms are now localized in service, we just check against known exchange names
-            # Note: "Bilinmeyen Cüzdan" won't match "Unknown Wallet" logic below unless we add it
             exchanges = ["Binance", "Coinbase", "Kraken", "OKX"]
 
             if item["to"] in exchanges:
@@ -292,8 +291,9 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def show_gas_tracker(self, current_lang, user_label, base_path):
-        t_title = "GAZ ÜCRETİ TAKİPÇİSİ" if current_lang == "tr" else "GAS FEE TRACKER"
-        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+        # shows transaction fee data for various networks
+        title = "GAZ ÜCRETİ TAKİPÇİSİ" if current_lang == "tr" else "GAS FEE TRACKER"
+        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
         ui = self._get_ui_strings(current_lang)
         data = self.market_service.get_gas_data(current_lang)
@@ -307,7 +307,6 @@ class MarketController:
         table_rows = []
 
         for item in data:
-            # Color logic based on status code
             if item["status_code"] == "LOW":
                 color = C.GREEN
                 icon = "🟢"
@@ -318,7 +317,6 @@ class MarketController:
                 color = C.WARNING
                 icon = "🟡"
 
-            # Formatting Rows
             status_display = f"{color}{icon} {item['status']}{C.END}"
 
             row = [
@@ -332,10 +330,65 @@ class MarketController:
 
         MenuV2.draw_table(headers, table_rows, widths)
 
-        # Add a tip message
         if current_lang == "tr":
             print(f"   {C.GREY}ℹ️  L2 ağları (Arbitrum, OP) genellikle Ethereum'dan 10x daha ucuzdur.{C.END}")
         else:
             print(f"   {C.GREY}ℹ️  L2 networks (Arbitrum, OP) are usually 10x cheaper than Ethereum.{C.END}")
+
+        input(f"\n{ui['return_msg']}")
+
+    def view_economic_calendar(self, current_lang, user_label, base_path):
+        # displays upcoming global economic events
+        title = "EKONOMİK TAKVİM" if current_lang == "tr" else "ECONOMIC CALENDAR"
+        MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
+
+        ui = self._get_ui_strings(current_lang)
+        data = self.market_service.get_economic_calendar(current_lang)
+
+        if current_lang == "tr":
+            h_str = f"   {C.BOLD}{C.CYAN}{'SAAT':<8}{'DÖVİZ':<6}{'OLAY':<32}{'ETKİ':<18}{'ÖNCEKİ/BEKLENTİ':<20}{C.END}"
+        else:
+            h_str = f"   {C.BOLD}{C.CYAN}{'TIME':<8}{'CURR':<6}{'EVENT':<32}{'IMPACT':<18}{'PREV / FORECAST':<20}{C.END}"
+
+        print(h_str)
+        print("   " + f"{C.GREY}{'-' * 84}{C.END}")
+
+        for item in data:
+            time_str = f"{item['time']:<8}"
+            curr_str = f"{item['currency']:<6}"
+
+            raw_event = item['event']
+            if len(raw_event) > 30:
+                raw_event = raw_event[:28] + ".."
+            event_str = f"{C.BOLD}{raw_event}{C.END}"
+            pad_event = " " * (32 - len(raw_event))
+
+            if item["impact"] == "high":
+                vis_impact = f"🔥 {item['impact_label']}"
+                colored_impact = f"{C.FAIL}{vis_impact}{C.END}"
+            elif item["impact"] == "med":
+                vis_impact = f"🔸 {item['impact_label']}"
+                colored_impact = f"{C.WARNING}{vis_impact}{C.END}"
+            else:
+                vis_impact = f"🔹 {item['impact_label']}"
+                colored_impact = f"{C.GREY}{vis_impact}{C.END}"
+
+            pad_len = 18 - len(vis_impact) - 1
+            if pad_len < 0: pad_len = 0
+            impact_str = colored_impact + (" " * pad_len)
+
+            vis_stats = f"{item['prev']} / {item['forecast']}"
+            colored_stats = f"{item['prev']} / {C.CYAN}{item['forecast']}{C.END}"
+            pad_stats = " " * (20 - len(vis_stats))
+
+            row = f"   {time_str}{curr_str}{event_str}{pad_event}{impact_str}{colored_stats}{pad_stats}"
+            print(row)
+
+        print("   " + f"{C.GREY}{'-' * 84}{C.END}")
+
+        if current_lang == "tr":
+            print(f"   {C.GREY}ℹ️  Yüksek etkili olaylar (🔥) piyasada sert hareketlere neden olabilir.{C.END}")
+        else:
+            print(f"   {C.GREY}ℹ️  High impact events (🔥) often cause high volatility in crypto.{C.END}")
 
         input(f"\n{ui['return_msg']}")

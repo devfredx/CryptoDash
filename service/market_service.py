@@ -4,27 +4,27 @@ class MarketService:
     def __init__(self):
         # Fixed asset list
         self.assets = [
-            {"rank": 1, "symbol": "BTC", "name": "Bitcoin", "price": 52150.0, "change": 2.4, "vol": 35000000000,
+            {"rank": 1, "symbol": "BTC  ", "name": "Bitcoin", "price": 52150.0, "change": 2.4, "vol": 35000000000,
              "mcap": 980000000000},
-            {"rank": 2, "symbol": "ETH", "name": "Ethereum", "price": 2980.5, "change": 1.2, "vol": 15000000000,
+            {"rank": 2, "symbol": "ETH  ", "name": "Ethereum", "price": 2980.5, "change": 1.2, "vol": 15000000000,
              "mcap": 350000000000},
-            {"rank": 3, "symbol": "BNB", "name": "Binance Coin", "price": 385.0, "change": -0.5, "vol": 900000000,
+            {"rank": 3, "symbol": "BNB  ", "name": "Binance", "price": 385.0, "change": -0.5, "vol": 900000000,
              "mcap": 58000000000},
-            {"rank": 4, "symbol": "SOL", "name": "Solana", "price": 112.4, "change": 5.8, "vol": 4200000000,
+            {"rank": 4, "symbol": "SOL  ", "name": "Solana", "price": 112.4, "change": 5.8, "vol": 4200000000,
              "mcap": 49000000000},
-            {"rank": 5, "symbol": "XRP", "name": "Ripple", "price": 0.58, "change": -0.8, "vol": 1200000000,
+            {"rank": 5, "symbol": "XRP  ", "name": "Ripple", "price": 0.58, "change": -0.8, "vol": 1200000000,
              "mcap": 31000000000},
-            {"rank": 6, "symbol": "ADA", "name": "Cardano", "price": 0.62, "change": -2.1, "vol": 450000000,
+            {"rank": 6, "symbol": "ADA  ", "name": "Cardano", "price": 0.62, "change": -2.1, "vol": 450000000,
              "mcap": 21000000000},
-            {"rank": 7, "symbol": "AVAX", "name": "Avalanche", "price": 41.8, "change": 8.4, "vol": 600000000,
+            {"rank": 7, "symbol": "AVAX ", "name": "Avalanche", "price": 41.8, "change": 8.4, "vol": 600000000,
              "mcap": 15500000000},
-            {"rank": 8, "symbol": "DOGE", "name": "Dogecoin", "price": 0.088, "change": 12.5, "vol": 800000000,
+            {"rank": 8, "symbol": "DOGE ", "name": "Dogecoin", "price": 0.088, "change": 12.5, "vol": 800000000,
              "mcap": 12000000000},
-            {"rank": 9, "symbol": "TRX", "name": "Tron", "price": 0.13, "change": 0.4, "vol": 300000000,
+            {"rank": 9, "symbol": "TRX  ", "name": "Tron", "price": 0.13, "change": 0.4, "vol": 300000000,
              "mcap": 11000000000},
-            {"rank": 10, "symbol": "LINK", "name": "Chainlink", "price": 19.5, "change": 3.2, "vol": 500000000,
+            {"rank": 10, "symbol": "LINK ", "name": "Chainlink", "price": 19.5, "change": 3.2, "vol": 500000000,
              "mcap": 10500000000},
-            {"rank": 11, "symbol": "DOT", "name": "Polkadot", "price": 7.8, "change": -1.5, "vol": 250000000,
+            {"rank": 11, "symbol": "DOT  ", "name": "Polkadot", "price": 7.8, "change": -1.5, "vol": 250000000,
              "mcap": 9800000000},
             {"rank": 12, "symbol": "MATIC", "name": "Polygon", "price": 0.98, "change": 1.1, "vol": 320000000,
              "mcap": 9200000000},
@@ -151,7 +151,7 @@ class MarketService:
         """
         if lang == "tr":
             suffix = "dk önce"
-            w_unknown = "Bilinmeyen Cüzdan"
+            w_unknown = "Bilinmeyen"
             w_cold = "Soğuk Cüzdan"
         else:
             suffix = "m ago"
@@ -168,9 +168,9 @@ class MarketService:
              "time": f"18{suffix}"},
             {"symbol": "XRP", "amount": 5000000, "value": 2900000, "from": "Binance", "to": "OKX",
              "time": f"24{suffix}"},
-            {"symbol": "DOGE", "amount": 10000000, "value": 880000, "from": w_unknown, "to": w_unknown,
+            {"symbol": "DOGE    ", "amount": 10000000, "value": 880000, "from": w_unknown, "to": w_unknown,
              "time": f"32{suffix}"},
-            {"symbol": "MATIC", "amount": 2000000, "value": 1960000, "from": "Polygon Bridge", "to": w_unknown,
+            {"symbol": "MATIC   ", "amount": 2000000, "value": 1960000, "from": "Polygon Bridge", "to": w_unknown,
              "time": f"40{suffix}"},
             {"symbol": "BTC", "amount": 55, "value": 2868250, "from": "Coinbase", "to": w_cold, "time": f"45{suffix}"},
             {"symbol": "BNB", "amount": 5000, "value": 1925000, "from": w_unknown, "to": "Binance",

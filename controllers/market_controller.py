@@ -3,6 +3,7 @@
 import time
 from ui.menu_v2 import MenuV2, C
 
+
 class MarketController:
     def __init__(self, market_service):
         self.market_service = market_service
@@ -31,7 +32,7 @@ class MarketController:
             }
 
     def _format_large_number(self, num):
-        # formats large integers into readable strings like 1b or 1m
+        # converts large numbers into readable strings with b or m suffix
         if num >= 1_000_000_000:
             return f"{num / 1_000_000_000:.1f}B"
         elif num >= 1_000_000:
@@ -39,7 +40,7 @@ class MarketController:
         return str(num)
 
     def view_prices(self, current_lang, user_label, base_path):
-        # displays live crypto price table
+        # displays live crypto prices with manual alignment logic
         title = "KRİPTO FİYATLARI" if current_lang == "tr" else "CRYPTO PRICES"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -47,34 +48,35 @@ class MarketController:
         data = self.market_service.get_top_coins()
 
         if current_lang == "tr":
-            headers = ["#", "VARLIK", "FİYAT", "24S %", "P. DEĞERİ", "HACİM (24S)"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'#':<4}{'VARLIK':<18}{'FİYAT':<14}{'24S %':<12}{'P. DEĞERİ':<12}{'HACİM':<12}{C.END}"
         else:
-            headers = ["#", "ASSET", "PRICE", "24H %", "M. CAP", "VOL (24H)"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'#':<4}{'ASSET':<18}{'PRICE':<14}{'24H %':<12}{'M. CAP':<12}{'VOLUME':<12}{C.END}"
 
-        widths = [4, 16, 14, 12, 12, 12]
-        table_rows = []
+        print(h_str)
+        print("   " + f"{C.GREY}{'-' * 72}{C.END}")
 
         for coin in data:
+            rank = f"{str(coin['rank']):<4}"
+            asset_name = f"{coin['symbol']} • {coin['name']}"
+            asset_str = f"{asset_name:<18}"
+            price_str = f"${coin['price']:,.2f}"
+            price_pad = f"{price_str:<14}"
+
             change_val = coin['change']
             arrow = "▲" if change_val >= 0 else "▼"
-            change_str = f"{arrow} {change_val}%"
-            asset_str = f"{coin['symbol']} • {coin['name']}"
+            vis_change = f"{arrow} {abs(change_val)}%"
+            color = C.GREEN if change_val >= 0 else C.FAIL
+            change_str = f"{color}{vis_change}{C.END}" + (" " * (12 - len(vis_change)))
 
-            row = [
-                str(coin["rank"]),
-                asset_str,
-                f"${coin['price']:,.2f}",
-                change_str,
-                self._format_large_number(coin["mcap"]),
-                self._format_large_number(coin["vol"])
-            ]
-            table_rows.append(row)
+            mcap = f"{self._format_large_number(coin['mcap']):<12}"
+            vol = f"{self._format_large_number(coin['vol']):<12}"
 
-        MenuV2.draw_table(headers, table_rows, widths)
+            print(f"   {rank}{asset_str}{price_pad}{change_str}{mcap}{vol}")
+
         input(f"\n{ui['return_msg']}")
 
     def view_listings(self, current_lang, user_label, base_path):
-        # displays new asset listings
+        # displays new listings using manual spacing
         title = "YENİ LİSTELEMELER" if current_lang == "tr" else "NEW LISTINGS"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -82,28 +84,31 @@ class MarketController:
         data = self.market_service.get_new_listings()
 
         if current_lang == "tr":
-            headers = ["Sembol", "İsim", "Fiyat", "Perf", "Tarih"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'SEMBOL':<10}{'İSİM':<18}{'FİYAT':<12}{'PERF':<12}{'TARİH':<15}{C.END}"
         else:
-            headers = ["Symbol", "Name", "Price", "Perf", "Date"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'SYMBOL':<10}{'NAME':<18}{'PRICE':<12}{'PERF':<12}{'DATE':<15}{C.END}"
 
-        widths = [10, 15, 15, 15, 15]
-        table_rows = []
+        print(h_str)
+        print("   " + f"{C.GREY}{'-' * 67}{C.END}")
 
         for coin in data:
-            row = [coin["symbol"], coin["name"], f"${coin['price']}", f"{coin['change']}%", coin["date"]]
-            table_rows.append(row)
+            sym = f"{coin['symbol']:<10}"
+            name = f"{coin['name']:<18}"
+            price = f"${coin['price']:<12}"
+            perf_val = f"{coin['change']}%"
+            perf_str = f"{C.GREEN}{perf_val}{C.END}" + (" " * (12 - len(perf_val)))
+            date = f"{coin['date']:<15}"
+            print(f"   {sym}{name}{price}{perf_str}{date}")
 
-        MenuV2.draw_table(headers, table_rows, widths)
         input(f"\n{ui['return_msg']}")
 
     def view_gainers(self, current_lang, user_label, base_path):
-        # displays top gainers and losers
+        # shows top gainers and losers in a simple list format
         title = "KAZANANLAR & KAYBEDENLER" if current_lang == "tr" else "GAINERS & LOSERS"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
         ui = self._get_ui_strings(current_lang)
         gainers, losers = self.market_service.get_gainers_losers()
-
         t_gainers = "EN ÇOK KAZANANLAR" if current_lang == "tr" else "ROCKET GAINERS"
         t_losers = "EN ÇOK KAYBEDENLER" if current_lang == "tr" else "TOP LOSERS"
 
@@ -118,7 +123,7 @@ class MarketController:
         input(f"\n\n{ui['return_msg']}")
 
     def view_sectors(self, current_lang, user_label, base_path):
-        # displays performance by market sectors
+        # views performance by market sectors with fixed padding
         title = "SEKTÖR PERFORMANSI" if current_lang == "tr" else "SECTOR PERFORMANCE"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -126,24 +131,29 @@ class MarketController:
         sectors = self.market_service.get_sector_data(current_lang)
 
         if current_lang == "tr":
-            headers = ["#", "SEKTÖR", "PERF (24S)", "P. DEĞERİ", "LİDER COIN"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'#':<4}{'SEKTÖR':<25}{'PERF (24S)':<15}{'P. DEĞERİ':<12}{'LİDER':<10}{C.END}"
         else:
-            headers = ["#", "SECTOR", "PERF (24H)", "M. CAP", "TOP TOKEN"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'#':<4}{'SECTOR':<25}{'PERF (24H)':<15}{'M. CAP':<12}{'TOP':<10}{C.END}"
 
-        widths = [4, 22, 12, 12, 12]
-        table_rows = []
+        print(h_str)
+        print("   " + f"{C.GREY}{'-' * 66}{C.END}")
 
         for s in sectors:
-            arrow = "▲" if s['perf'] >= 0 else "▼"
-            perf_str = f"{arrow} {s['perf']}%"
-            row = [str(s['rank']), s['name'], perf_str, s['mcap'], s['top']]
-            table_rows.append(row)
+            rank = f"{str(s['rank']):<4}"
+            name = f"{s['name']:<25}"
+            perf_val = s['perf']
+            arrow = "▲" if perf_val >= 0 else "▼"
+            vis_perf = f"{arrow} {perf_val}%"
+            color = C.GREEN if perf_val >= 0 else C.FAIL
+            perf_str = f"{color}{vis_perf}{C.END}" + (" " * (15 - len(vis_perf)))
+            mcap = f"{s['mcap']:<12}"
+            top = f"{s['top']:<10}"
+            print(f"   {rank}{name}{perf_str}{mcap}{top}")
 
-        MenuV2.draw_table(headers, table_rows, widths)
         input(f"\n{ui['return_msg']}")
 
     def view_fear_greed(self, current_lang, user_label, base_path):
-        # shows fear and greed index gauge and history
+        # shows fear and greed gauge with history table
         t_title = "KORKU & AÇGÖZLÜLÜK ENDEKSİ" if current_lang == "tr" else "FEAR & GREED INDEX"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -152,11 +162,9 @@ class MarketController:
         MenuV2.draw_gauge(fng_data["current_value"], fng_data["current_status"])
 
         if current_lang == "tr":
-            h_val = f"{C.CYAN}DEĞER{C.END}"
-            headers = ["DÖNEM", h_val, "DURUM"]
+            headers = ["DÖNEM", "DEĞER", "DURUM"]
         else:
-            h_val = f"{C.CYAN}VALUE{C.END}"
-            headers = ["PERIOD", h_val, "STATUS"]
+            headers = ["PERIOD", "VALUE", "STATUS"]
 
         widths = [15, 20, 25]
         table_rows = []
@@ -169,14 +177,13 @@ class MarketController:
                 val_str = f"{C.GREEN}{val}{C.END}"
             else:
                 val_str = f"{C.CYAN}{val}{C.END}"
-
             table_rows.append([item['period'], val_str, item['status']])
 
         MenuV2.draw_table(headers, table_rows, widths)
         input(f"\n{ui['return_msg']}")
 
     def show_chart(self, current_lang, user_label, base_path):
-        # allows user to select an asset and view its price chart
+        # renders simple terminal chart for selected asset
         t_title = "TRADINGVIEW GRAFİK" if current_lang == "tr" else "TRADINGVIEW CHART"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -187,30 +194,20 @@ class MarketController:
         print(f"{ui['input_prefix']}{ui['select_asset']}", end="")
         choice = input().strip()
 
-        if not choice.isdigit():
-            print(f"\n   {C.FAIL}{ui['invalid']}{C.END}")
-            time.sleep(1)
-            return
-
-        choice_idx = int(choice)
-        if choice_idx == 0: return
-
-        if 1 <= choice_idx <= len(assets):
-            selected_asset = assets[choice_idx - 1]
+        if choice.isdigit() and 1 <= int(choice) <= len(assets):
+            selected_asset = assets[int(choice) - 1]
             target_symbol = selected_asset['symbol']
-
             print(f"\n   {C.WARNING}{ui['load_msg']}{C.END}")
             time.sleep(0.5)
-
             chart_data = self.market_service.get_chart_data(target_symbol)
             MenuV2.draw_simple_chart(target_symbol, chart_data)
             input(f"{ui['return_msg']}")
         else:
-            print(f"\n   {C.FAIL}{ui['not_found']}{C.END}")
+            if choice != "0": print(f"\n   {C.FAIL}{ui['not_found']}{C.END}")
             time.sleep(1)
 
     def show_heatmap(self, current_lang, user_label, base_path):
-        # displays a visual grid of market performance
+        # displays visual heatmap of the top assets
         t_title = "PİYASA ISI HARİTASI" if current_lang == "tr" else "MARKET HEATMAP"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -220,7 +217,7 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def show_on_chain(self, current_lang, user_label, base_path):
-        # displays blockchain specific data for a chosen asset
+        # performs mock on chain scan for selected coin
         t_title = "ZİNCİR ÜSTÜ ANALİZ" if current_lang == "tr" else "ON-CHAIN ANALYSIS"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -231,67 +228,78 @@ class MarketController:
         print(f"{ui['input_prefix']}{ui['select_asset']}", end="")
         choice = input().strip()
 
-        if  choice.isdigit() and int(choice) > 0 and int(choice) <= len(assets):
+        if choice.isdigit() and 1 <= int(choice) <= len(assets):
             selected_asset = assets[int(choice) - 1]
-            target_symbol = selected_asset['symbol']
-
             print(f"\n   {C.WARNING}{ui['scan']}{C.END}")
             time.sleep(1)
-
-            onchain_data = self.market_service.get_onchain_data(target_symbol, current_lang)
+            onchain_data = self.market_service.get_onchain_data(selected_asset['symbol'], current_lang)
             MenuV2.draw_onchain_report(onchain_data)
             input(f"{ui['return_msg']}")
         else:
-            if choice != "0":
-                print(f"\n   {C.FAIL}{ui['invalid']}{C.END}")
-                time.sleep(0.5)
+            if choice != "0": print(f"\n   {C.FAIL}{ui['invalid']}{C.END}")
+            time.sleep(0.5)
 
     def show_whale_alerts(self, current_lang, user_label, base_path):
-        # displays large transaction alerts
+        # display whale alerts with fixed manual alignment
         t_title = "BALİNA ALARMLARI" if current_lang == "tr" else "WHALE ALERTS"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
         ui = self._get_ui_strings(current_lang)
         data = self.market_service.get_whale_alerts(current_lang)
 
+        # print table headers with manual spacing
         if current_lang == "tr":
-            headers = ["COIN", "MİKTAR", "DEĞER (USD)", "KAYNAK -> HEDEF", "ZAMAN"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'COIN':<10}{'MİKTAR':<15}{'DEĞER (USD)':<15}{'KAYNAK -> HEDEF':<35}{'ZAMAN':<10}{C.END}"
         else:
-            headers = ["ASSET", "AMOUNT", "VALUE (USD)", "FROM -> TO", "TIME"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'ASSET':<10}{'AMOUNT':<15}{'VALUE (USD)':<15}{'FROM -> TO':<35}{'TIME':<10}{C.END}"
 
-        widths = [8, 15, 18, 35, 12]
-        table_rows = []
+        print(h_str)
+        print("   " + f"{C.GREY}{'-' * 85}{C.END}")
 
+        # process each alert with manual padding logic
         for item in data:
-            val_str = f"${self._format_large_number(item['value'])}"
+            # format asset column with icons
             exchanges = ["Binance", "Coinbase", "Kraken", "OKX"]
+            icon = "🚨" if item["to"] in exchanges else ("🐋" if item["from"] in exchanges else "⇄")
 
+            vis_asset = f"{icon} {item['symbol']}"
+            colored_asset = f"{C.BOLD}{vis_asset}{C.END}"
+            # compensate for emoji width in terminal
+            pad_asset = " " * (10 - len(vis_asset) - 1)
+
+            # format transaction amount
+            amount_val = f"{item['amount']:,}"
+            amount_str = f"{amount_val:<15}"
+
+            # format usd value with cyan color
+            val_vis = f"${self._format_large_number(item['value'])}"
+            colored_val = f"{C.CYAN}{val_vis}{C.END}"
+            pad_val = " " * (15 - len(val_vis))
+
+            # format source and destination with exchange highlights
+            flow_vis = f"{item['from']} -> {item['to']}"
             if item["to"] in exchanges:
-                icon = "🚨"
-                flow = f"{item['from']} -> {C.FAIL}{item['to']}{C.END}"
+                # highlight destination red for exchanges
+                flow_colored = f"{item['from']} -> {C.FAIL}{item['to']}{C.END}"
             elif item["from"] in exchanges:
-                icon = "🐋"
-                flow = f"{C.WARNING}{item['from']}{C.END} -> {item['to']}"
+                # highlight source yellow for exchanges
+                flow_colored = f"{C.WARNING}{item['from']}{C.END} -> {item['to']}"
             else:
-                icon = "⇄"
-                flow = f"{item['from']} -> {item['to']}"
+                flow_colored = flow_vis
 
-            asset_display = f"{icon} {item['symbol']}"
+            pad_flow = " " * (35 - len(flow_vis))
 
-            row = [
-                asset_display,
-                f"{item['amount']:,}",
-                val_str,
-                flow,
-                item['time']
-            ]
-            table_rows.append(row)
+            # format time column
+            time_str = f"{item['time']:<10}"
 
-        MenuV2.draw_table(headers, table_rows, widths)
+            # combine all parts and print aligned row
+            row = f"   {colored_asset}{pad_asset}{amount_str}{colored_val}{pad_val}{flow_colored}{pad_flow}{time_str}"
+            print(row)
+
         input(f"\n{ui['return_msg']}")
 
     def show_gas_tracker(self, current_lang, user_label, base_path):
-        # shows transaction fee data for various networks
+        # monitors gas fees across networks using manual alignment
         title = "GAZ ÜCRETİ TAKİPÇİSİ" if current_lang == "tr" else "GAS FEE TRACKER"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -299,46 +307,29 @@ class MarketController:
         data = self.market_service.get_gas_data(current_lang)
 
         if current_lang == "tr":
-            headers = ["AĞ", "GWEI", "TRANSFER ($)", "SWAP ($)", "DURUM"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'AĞ':<15}{'GWEI':<10}{'TRANSFER':<15}{'SWAP':<15}{'DURUM':<15}{C.END}"
         else:
-            headers = ["NETWORK", "GWEI", "TRANSFER ($)", "SWAP ($)", "STATUS"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'NETWORK':<15}{'GWEI':<10}{'TRANSFER':<15}{'SWAP':<15}{'STATUS':<15}{C.END}"
 
-        widths = [12, 10, 15, 15, 15]
-        table_rows = []
+        print(h_str)
+        print("   " + f"{C.GREY}{'-' * 70}{C.END}")
 
         for item in data:
-            if item["status_code"] == "LOW":
-                color = C.GREEN
-                icon = "🟢"
-            elif item["status_code"] == "HIGH":
-                color = C.FAIL
-                icon = "🔴"
-            else:
-                color = C.WARNING
-                icon = "🟡"
-
-            status_display = f"{color}{icon} {item['status']}{C.END}"
-
-            row = [
-                item["network"],
-                str(item["gwei"]),
-                f"${item['transfer']}",
-                f"${item['swap']}",
-                status_display
-            ]
-            table_rows.append(row)
-
-        MenuV2.draw_table(headers, table_rows, widths)
-
-        if current_lang == "tr":
-            print(f"   {C.GREY}ℹ️  L2 ağları (Arbitrum, OP) genellikle Ethereum'dan 10x daha ucuzdur.{C.END}")
-        else:
-            print(f"   {C.GREY}ℹ️  L2 networks (Arbitrum, OP) are usually 10x cheaper than Ethereum.{C.END}")
+            net = f"{item['network']:<15}"
+            gwei = f"{str(item['gwei']):<10}"
+            trans = f"${item['transfer']:<15}"
+            swap = f"${item['swap']:<15}"
+            icon = "🟢" if item["status_code"] == "LOW" else ("🔴" if item["status_code"] == "HIGH" else "🟡")
+            color = C.GREEN if item["status_code"] == "LOW" else (
+                C.FAIL if item["status_code"] == "HIGH" else C.WARNING)
+            stat_vis = f"{icon} {item['status']}"
+            stat_str = f"{color}{stat_vis}{C.END}" + (" " * (15 - len(stat_vis)))
+            print(f"   {net}{gwei}{trans}{swap}{stat_str}")
 
         input(f"\n{ui['return_msg']}")
 
     def view_economic_calendar(self, current_lang, user_label, base_path):
-        # displays upcoming global economic events
+        # lists global economic events with specialized manual padding
         title = "EKONOMİK TAKVİM" if current_lang == "tr" else "ECONOMIC CALENDAR"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
@@ -354,41 +345,17 @@ class MarketController:
         print("   " + f"{C.GREY}{'-' * 84}{C.END}")
 
         for item in data:
-            time_str = f"{item['time']:<8}"
-            curr_str = f"{item['currency']:<6}"
-
             raw_event = item['event']
-            if len(raw_event) > 30:
-                raw_event = raw_event[:28] + ".."
-            event_str = f"{C.BOLD}{raw_event}{C.END}"
-            pad_event = " " * (32 - len(raw_event))
+            if len(raw_event) > 30: raw_event = raw_event[:28] + ".."
+            event_str = f"{C.BOLD}{raw_event}{C.END}" + (" " * (32 - len(raw_event)))
 
-            if item["impact"] == "high":
-                vis_impact = f"🔥 {item['impact_label']}"
-                colored_impact = f"{C.FAIL}{vis_impact}{C.END}"
-            elif item["impact"] == "med":
-                vis_impact = f"🔸 {item['impact_label']}"
-                colored_impact = f"{C.WARNING}{vis_impact}{C.END}"
-            else:
-                vis_impact = f"🔹 {item['impact_label']}"
-                colored_impact = f"{C.GREY}{vis_impact}{C.END}"
+            icon = "🔥" if item["impact"] == "high" else ("🔸" if item["impact"] == "med" else "🔹")
+            color = C.FAIL if item["impact"] == "high" else (C.WARNING if item["impact"] == "med" else C.GREY)
+            impact_vis = f"{icon} {item['impact_label']}"
+            impact_str = f"{color}{impact_vis}{C.END}" + (" " * (18 - len(impact_vis) - 1))
+            stats_vis = f"{item['prev']} / {item['forecast']}"
+            stats_str = f"{item['prev']} / {C.CYAN}{item['forecast']}{C.END}" + (" " * (20 - len(stats_vis)))
 
-            pad_len = 18 - len(vis_impact) - 1
-            if pad_len < 0: pad_len = 0
-            impact_str = colored_impact + (" " * pad_len)
-
-            vis_stats = f"{item['prev']} / {item['forecast']}"
-            colored_stats = f"{item['prev']} / {C.CYAN}{item['forecast']}{C.END}"
-            pad_stats = " " * (20 - len(vis_stats))
-
-            row = f"   {time_str}{curr_str}{event_str}{pad_event}{impact_str}{colored_stats}{pad_stats}"
-            print(row)
-
-        print("   " + f"{C.GREY}{'-' * 84}{C.END}")
-
-        if current_lang == "tr":
-            print(f"   {C.GREY}ℹ️  Yüksek etkili olaylar (🔥) piyasada sert hareketlere neden olabilir.{C.END}")
-        else:
-            print(f"   {C.GREY}ℹ️  High impact events (🔥) often cause high volatility in crypto.{C.END}")
+            print(f"   {item['time']:<8}{item['currency']:<6}{event_str}{impact_str}{stats_str}")
 
         input(f"\n{ui['return_msg']}")

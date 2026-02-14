@@ -290,3 +290,52 @@ class MarketController:
 
         MenuV2.draw_table(headers, table_rows, widths)
         input(f"\n{ui['return_msg']}")
+
+    def show_gas_tracker(self, current_lang, user_label, base_path):
+        t_title = "GAZ ÜCRETİ TAKİPÇİSİ" if current_lang == "tr" else "GAS FEE TRACKER"
+        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+        ui = self._get_ui_strings(current_lang)
+        data = self.market_service.get_gas_data(current_lang)
+
+        if current_lang == "tr":
+            headers = ["AĞ", "GWEI", "TRANSFER ($)", "SWAP ($)", "DURUM"]
+        else:
+            headers = ["NETWORK", "GWEI", "TRANSFER ($)", "SWAP ($)", "STATUS"]
+
+        widths = [12, 10, 15, 15, 15]
+        table_rows = []
+
+        for item in data:
+            # Color logic based on status code
+            if item["status_code"] == "LOW":
+                color = C.GREEN
+                icon = "🟢"
+            elif item["status_code"] == "HIGH":
+                color = C.FAIL
+                icon = "🔴"
+            else:
+                color = C.WARNING
+                icon = "🟡"
+
+            # Formatting Rows
+            status_display = f"{color}{icon} {item['status']}{C.END}"
+
+            row = [
+                item["network"],
+                str(item["gwei"]),
+                f"${item['transfer']}",
+                f"${item['swap']}",
+                status_display
+            ]
+            table_rows.append(row)
+
+        MenuV2.draw_table(headers, table_rows, widths)
+
+        # Add a tip message
+        if current_lang == "tr":
+            print(f"   {C.GREY}ℹ️  L2 ağları (Arbitrum, OP) genellikle Ethereum'dan 10x daha ucuzdur.{C.END}")
+        else:
+            print(f"   {C.GREY}ℹ️  L2 networks (Arbitrum, OP) are usually 10x cheaper than Ethereum.{C.END}")
+
+        input(f"\n{ui['return_msg']}")

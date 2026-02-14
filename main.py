@@ -205,6 +205,9 @@ def main():
                     elif "whale" in action.lower():
                         market_controller.show_whale_alerts(current_lang, user_label, base_path)
 
+                    elif "gas" in action.lower():
+                        market_controller.show_gas_tracker(current_lang, user_label, base_path)
+
                     # --- OTHER SERVICES ---
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"], user_info=user_label)

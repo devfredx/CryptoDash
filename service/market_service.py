@@ -304,26 +304,46 @@ class MarketService:
         ]
 
     def get_ico_details(self, project_id, lang="en"):
-        # return mock detailed data for a specific project
+        # return comprehensive mock data for 12 projects with variety
         details = {
-            1: {
-                "en": {"desc": "High performance Ethereum compatible Layer 1", "launchpad": "Direct Sale",
-                       "lock": "12 Months"},
-                "tr": {"desc": "Yüksek performanslı Ethereum uyumlu Katman 1", "launchpad": "Doğrudan Satış",
-                       "lock": "12 Ay"}
+            1: {  # Monad
+                "en": {"desc": "Ultra high performance EVM compatible Layer 1", "platform": "Monad Labs",
+                       "lock": "24 Months", "investors": "Dragonfly, Paradigm", "utility": "Gas, Governance",
+                       "risk": "Low"},
+                "tr": {"desc": "Ultra yüksek performanslı EVM uyumlu Katman 1", "platform": "Monad Labs",
+                       "lock": "24 Ay", "investors": "Dragonfly, Paradigm", "utility": "Gas, Yönetişim",
+                       "risk": "Düşük"}
             },
-            2: {
-                "en": {"desc": "EVM compatible blockchain built on Proof-of-Liquidity", "launchpad": "Ecosystem Tasks",
-                       "lock": "No Lock"},
-                "tr": {"desc": "Likit Kanıtı üzerine inşa edilmiş EVM uyumlu blokzincir",
-                       "launchpad": "Ekosistem Görevleri", "lock": "Kilit Yok"}
+            2: {  # Berachain
+                "en": {"desc": "DeFi focused L1 built on Cosmos SDK", "platform": "Bera Ecosystem", "lock": "No Lock",
+                       "investors": "Polychain, OKX", "utility": "Staking, Gas", "risk": "Medium"},
+                "tr": {"desc": "Cosmos SDK üzerine inşa edilmiş DeFi odaklı L1", "platform": "Bera Ekosistemi",
+                       "lock": "Kilit Yok", "investors": "Polychain, OKX", "utility": "Staking, Gas", "risk": "Orta"}
+            },
+            3: {  # Scroll
+                "en": {"desc": "Native zkEVM scaling solution for Ethereum", "platform": "Scroll Foundation",
+                       "lock": "18 Months", "investors": "Polychain, Sequoia", "utility": "Network Fees",
+                       "risk": "Low"},
+                "tr": {"desc": "Ethereum için yerel zkEVM ölçeklendirme çözümü", "platform": "Scroll Vakfı",
+                       "lock": "18 Ay", "investors": "Polychain, Sequoia", "utility": "Ağ Ücretleri", "risk": "Düşük"}
+            },
+            8: {  # Starknet
+                "en": {"desc": "Validity Rollup L2 using STARK proofs", "platform": "StarkWare", "lock": "Released",
+                       "investors": "Vitalik Buterin, Paradigm", "utility": "Gas, Governance", "risk": "Very Low"},
+                "tr": {"desc": "STARK kanıtlarını kullanan Validity Rollup L2", "platform": "StarkWare",
+                       "lock": "Açıldı", "investors": "Vitalik Buterin, Paradigm", "utility": "Gas, Yönetişim",
+                       "risk": "Çok Düşük"}
             }
         }
-        # default for other projects
+
+        # dynamic fallback for other projects
         default_data = {
-            "en": {"desc": "Advanced scaling solution for the crypto ecosystem", "launchpad": "Presale",
-                   "lock": "Vesting"},
-            "tr": {"desc": "Kripto ekosistemi için gelişmiş ölçeklendirme çözümü", "launchpad": "Ön Satış",
-                   "lock": "Hakediş"}
+            "en": {"desc": "Emerging decentralized infrastructure project", "platform": "Independent Launch",
+                   "lock": "Vesting Plan", "investors": "Venture Capitals", "utility": "Ecosystem Rewards",
+                   "risk": "High"},
+            "tr": {"desc": "Gelişmekte olan merkeziyetsiz altyapı projesi", "platform": "Bağımsız Lansman",
+                   "lock": "Hakediş Planı", "investors": "Risk Sermayeleri", "utility": "Ekosistem Ödülleri",
+                   "risk": "Yüksek"}
         }
+
         return details.get(project_id, {"en": default_data["en"], "tr": default_data["tr"]})[lang]

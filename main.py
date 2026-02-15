@@ -225,6 +225,15 @@ def main():
                         Menu.show_support_page(content)
                         input(f"\n{ui_return_msg}")
 
+
+                    elif action == "show_ico":
+                        # call the newly created ico calendar method without 'self'
+                        market_controller.show_ico_calendar(
+                            current_lang,
+                            user_label,
+                            ["HOME", "CALENDARS"] if current_lang == "en" else ["ANASAYFA", "TAKVİMLER"]
+                        )
+
                     else:
                         MenuV2.prepare_content_screen(base_path + [label], user_info=user_label)
                         print(f"\n[🚧] Feature '{label}' is under development")

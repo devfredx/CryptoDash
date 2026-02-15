@@ -142,7 +142,7 @@ class MenuV2:
         filled_len = int(width * value // 100)
         bar = '█' * filled_len + '-' * (width - filled_len)
 
-        # use the passed title instead of hardcoded string
+        # print gauge with dynamic title to allow localization
         print(f"\n   {C.BOLD}{title}: {color}{label.upper()}{C.END}")
         print(f"   {color}[{bar}] {value}/100{C.END}\n")
 
@@ -166,12 +166,16 @@ class MenuV2:
         print("")
 
     @staticmethod
-    def draw_simple_chart(symbol, prices):
+    def draw_simple_chart(symbol, prices, lang="en"):
+        # check if price data exists
         if not prices:
-            print("No data available.")
+            msg = "Veri bulunamadı" if lang == "tr" else "No data available"
+            print(f"   {msg}")
             return
 
-        print(f"\n   {C.BOLD}{symbol} Price Action (Last 20){C.END}")
+        # define localized chart header
+        header = f"{symbol} Fiyat Hareketi (Son 20)" if lang == "tr" else f"{symbol} Price Action (Last 20)"
+        print(f"\n   {C.BOLD}{header}{C.END}")
         print(f"   {C.GREY}{'-' * 40}{C.END}")
 
         min_p = min(prices)
@@ -180,6 +184,7 @@ class MenuV2:
 
         if diff == 0: diff = 1
 
+        # render each price bar with manual alignment
         for price in prices:
             length = int((price - min_p) / diff * 30)
             bar = "█" * length

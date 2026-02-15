@@ -33,7 +33,14 @@ class MarketService:
     def get_top_coins(self):
         return self.assets
 
-    def get_new_listings(self):
+    def get_new_listings(self, lang="en"):
+        # return mock new asset listings with localized dates
+        if lang == "tr":
+            return [
+                {"symbol": "PIXEL", "name": "Pixels", "price": 0.52, "change": 1250.0, "date": "1 Gün Önce"},
+                {"symbol": "STRK", "name": "Starknet", "price": 2.10, "change": 0.0, "date": "Yakında"},
+                {"symbol": "DYM", "name": "Dymension", "price": 7.45, "change": 45.0, "date": "1 Hafta Önce"},
+            ]
         return [
             {"symbol": "PIXEL", "name": "Pixels", "price": 0.52, "change": 1250.0, "date": "1 Day Ago"},
             {"symbol": "STRK", "name": "Starknet", "price": 2.10, "change": 0.0, "date": "Coming Soon"},
@@ -263,3 +270,60 @@ class MarketService:
             processed_data.append(item)
 
         return processed_data
+
+    def get_ico_list(self, lang="en"):
+        # return a full list of 12 projects to match menu prompt
+        if lang == "tr":
+            return [
+                {"id": 1, "name": "Monad", "type": "ICO", "cat": "Layer 1", "status": "Yakında", "goal": "$200M"},
+                {"id": 2, "name": "Berachain", "type": "Airdrop", "cat": "DeFi", "status": "Testnet", "goal": "Belirsiz"},
+                {"id": 3, "name": "Scroll", "type": "ICO", "cat": "Layer 2", "status": "Aktif", "goal": "$50M"},
+                {"id": 4, "name": "Fuel Network", "type": "Airdrop", "cat": "Modular", "status": "Yakında", "goal": "Belirsiz"},
+                {"id": 5, "name": "Celestia", "type": "Airdrop", "cat": "Data Avail.", "status": "Aktif", "goal": "$56M"},
+                {"id": 6, "name": "EigenLayer", "type": "Airdrop", "cat": "Restaking", "status": "Testnet", "goal": "Belirsiz"},
+                {"id": 7, "name": "LayerZero", "type": "Airdrop", "cat": "Interop.", "status": "Yakında", "goal": "Belirsiz"},
+                {"id": 8, "name": "Starknet", "type": "Airdrop", "cat": "ZK-Rollup", "status": "Aktif", "goal": "$280M"},
+                {"id": 9, "name": "Taiko", "type": "ICO", "cat": "ZK-EVM", "status": "Testnet", "goal": "$22M"},
+                {"id": 10, "name": "Linea", "type": "Airdrop", "cat": "ZK-EVM", "status": "Testnet", "goal": "Belirsiz"},
+                {"id": 11, "name": "Aleo", "type": "ICO", "cat": "Privacy L1", "status": "Yakında", "goal": "$200M"},
+                {"id": 12, "name": "Zora", "type": "Airdrop", "cat": "NFT L2", "status": "Aktif", "goal": "Belirsiz"}
+            ]
+        return [
+            {"id": 1, "name": "Monad", "type": "ICO", "cat": "Layer 1", "status": "Upcoming", "goal": "$200M"},
+            {"id": 2, "name": "Berachain", "type": "Airdrop", "cat": "DeFi", "status": "Testnet", "goal": "TBA"},
+            {"id": 3, "name": "Scroll", "type": "ICO", "cat": "Layer 2", "status": "Active", "goal": "$50M"},
+            {"id": 4, "name": "Fuel Network", "type": "Airdrop", "cat": "Modular", "status": "Upcoming", "goal": "TBA"},
+            {"id": 5, "name": "Celestia", "type": "Airdrop", "cat": "Data Avail.", "status": "Active", "goal": "$56M"},
+            {"id": 6, "name": "EigenLayer", "type": "Airdrop", "cat": "Restaking", "status": "Testnet", "goal": "TBA"},
+            {"id": 7, "name": "LayerZero", "type": "Airdrop", "cat": "Interop.", "status": "Upcoming", "goal": "TBA"},
+            {"id": 8, "name": "Starknet", "type": "Airdrop", "cat": "ZK-Rollup", "status": "Active", "goal": "$280M"},
+            {"id": 9, "name": "Taiko", "type": "ICO", "cat": "ZK-EVM", "status": "Testnet", "goal": "$22M"},
+            {"id": 10, "name": "Linea", "type": "Airdrop", "cat": "ZK-EVM", "status": "Testnet", "goal": "TBA"},
+            {"id": 11, "name": "Aleo", "type": "ICO", "cat": "Privacy L1", "status": "Upcoming", "goal": "$200M"},
+            {"id": 12, "name": "Zora", "type": "Airdrop", "cat": "NFT L2", "status": "Active", "goal": "TBA"}
+        ]
+
+    def get_ico_details(self, project_id, lang="en"):
+        # return mock detailed data for a specific project
+        details = {
+            1: {
+                "en": {"desc": "High performance Ethereum compatible Layer 1", "launchpad": "Direct Sale",
+                       "lock": "12 Months"},
+                "tr": {"desc": "Yüksek performanslı Ethereum uyumlu Katman 1", "launchpad": "Doğrudan Satış",
+                       "lock": "12 Ay"}
+            },
+            2: {
+                "en": {"desc": "EVM compatible blockchain built on Proof-of-Liquidity", "launchpad": "Ecosystem Tasks",
+                       "lock": "No Lock"},
+                "tr": {"desc": "Likit Kanıtı üzerine inşa edilmiş EVM uyumlu blokzincir",
+                       "launchpad": "Ekosistem Görevleri", "lock": "Kilit Yok"}
+            }
+        }
+        # default for other projects
+        default_data = {
+            "en": {"desc": "Advanced scaling solution for the crypto ecosystem", "launchpad": "Presale",
+                   "lock": "Vesting"},
+            "tr": {"desc": "Kripto ekosistemi için gelişmiş ölçeklendirme çözümü", "launchpad": "Ön Satış",
+                   "lock": "Hakediş"}
+        }
+        return details.get(project_id, {"en": default_data["en"], "tr": default_data["tr"]})[lang]

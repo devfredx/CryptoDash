@@ -51,7 +51,7 @@ def get_guest_menu_structure(lang="en"):
             "m6_cats": ["🔍 Arama", "🌐 Dil", "🔑 Giriş", "📝 Kayıt"],
 
             "md_items": ["Kripto Fiyatları", "Yeni Listelenenler", "Kazananlar/Kaybedenler", "Sektörler (DeFi/AI)", "Korku & Açgözlülük"],
-            "ma_items": ["Gelişmiş Grafik", "Sıcaklık Haritası", "Zincir Üstü Veriler", "Balina Hareketleri", "Gas Fee Heatmap"],
+            "ma_items": ["Gelişmiş Grafik", "Sıcaklık Haritası", "Zincir Üstü Veriler", "Balina Hareketleri", "Gaz Ücreti Takipçisi"],
             "mc_items": ["Ekonomik Takvim", "Airdrop & ICO", "Token Kilit Açılımı"],
 
             "to_items": ["Kolay Al/Sat", "Spot Borsa", "Hızlı Dönüştür"],

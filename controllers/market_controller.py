@@ -198,8 +198,9 @@ class MarketController:
             print(f"   {period}{val_str}{status}")
 
         input(f"\n{ui['return_msg']}")
+
     def show_chart(self, current_lang, user_label, base_path):
-        # renders simple terminal chart for selected asset
+        # prepare screen and show asset list
         t_title = "TRADINGVIEW GRAFİK" if current_lang == "tr" else "TRADINGVIEW CHART"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -210,16 +211,36 @@ class MarketController:
         print(f"{ui['input_prefix']}{ui['select_asset']}", end="")
         choice = input().strip()
 
-        if choice.isdigit() and 1 <= int(choice) <= len(assets):
-            selected_asset = assets[int(choice) - 1]
+        if not choice.isdigit():
+            print(f"\n   {C.FAIL}{ui['invalid']}{C.END}")
+            time.sleep(1)
+            return
+
+        choice_idx = int(choice)
+        if choice_idx == 0: return
+
+        if 1 <= choice_idx <= len(assets):
+            selected_asset = assets[choice_idx - 1]
             target_symbol = selected_asset['symbol']
-            print(f"\n   {C.WARNING}{ui['load_msg']}{C.END}")
+
+            # clear screen and redraw header for clean chart view
+            MenuV2.prepare_content_screen(base_path + [t_title, target_symbol], user_info=user_label)
+
+            # display selection info
+            selection_text = "Seçilen Varlık" if current_lang == "tr" else "Selected Asset"
+            print(f"   {C.BOLD}{selection_text}: {C.CYAN}{target_symbol} ({selected_asset['name']}){C.END}\n")
+
+            print(f"   {C.WARNING}{ui['load_msg']}{C.END}")
             time.sleep(0.5)
+
+            # render chart with language support
             chart_data = self.market_service.get_chart_data(target_symbol)
-            MenuV2.draw_simple_chart(target_symbol, chart_data)
+            MenuV2.draw_simple_chart(target_symbol, chart_data, current_lang)
+
+            # handle return interaction
             input(f"{ui['return_msg']}")
         else:
-            if choice != "0": print(f"\n   {C.FAIL}{ui['not_found']}{C.END}")
+            print(f"\n   {C.FAIL}{ui['not_found']}{C.END}")
             time.sleep(1)
 
     def show_heatmap(self, current_lang, user_label, base_path):

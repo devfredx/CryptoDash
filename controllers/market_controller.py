@@ -412,34 +412,28 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def show_ico_calendar(self, current_lang, user_label, base_path):
-        # prepare screen and fetch projects
-        t_title = "AIRDROP & ICO"
-        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+        # existing list code remains same until choice logic
+        # ... fetch data and print table ...
 
         ui = self._get_ui_strings(current_lang)
         data = self.market_service.get_ico_list(current_lang)
 
-        # print header with manual alignment
+        # print project table header
         if current_lang == "tr":
             h_str = f"   {C.BOLD}{C.CYAN}{'#':<4}{'PROJE':<15}{'TÜR':<12}{'KATEGORİ':<15}{'DURUM':<12}{'HEDEF':<10}{C.END}"
         else:
             h_str = f"   {C.BOLD}{C.CYAN}{'#':<4}{'PROJECT':<15}{'TYPE':<12}{'CATEGORY':<15}{'STATUS':<12}{'GOAL':<10}{C.END}"
-
         print(h_str)
         print("   " + f"{C.GREY}{'-' * 70}{C.END}")
 
-        # display projects in a table
         for item in data:
             idx = f"{item['id']:<4}"
             name = f"{C.BOLD}{item['name']:<15}{C.END}"
             type_str = f"{item['type']:<12}"
             cat = f"{item['cat']:<15}"
-
-            # color coding for status
             status_val = item['status']
             color = C.GREEN if status_val in ["Active", "Aktif", "Testnet"] else C.WARNING
             status_str = f"{color}{status_val}{C.END}" + (" " * (12 - len(status_val)))
-
             goal = f"{item['goal']:<10}"
             print(f"   {idx}{name}{type_str}{cat}{status_str}{goal}")
 
@@ -451,25 +445,31 @@ class MarketController:
             selected = data[int(choice) - 1]
             details = self.market_service.get_ico_details(selected['id'], current_lang)
 
-            # clear screen for focused detailed view
-            MenuV2.prepare_content_screen(base_path + [t_title, selected['name']], user_info=user_label)
+            # clear screen for high quality detailed report
+            MenuV2.prepare_content_screen(base_path + ["DETAILS", selected['name']], user_info=user_label)
 
-            # define labels
-            lbl = {
-                "tr": ["PROJE DETAYLARI", "Açıklama", "Platform", "Kilit Süresi"],
-                "en": ["PROJECT DETAILS", "Description", "Platform", "Lock Period"]
+            # localized field labels
+            l = {
+                "tr": ["PROJE RAPORU", "Açıklama", "Platform", "Kilit Yapısı", "Yatırımcılar", "Kullanım",
+                       "Risk Skoru"],
+                "en": ["PROJECT REPORT", "Description", "Platform", "Lock Structure", "Top Investors", "Utility",
+                       "Risk Score"]
             }[current_lang]
 
-            print(f"   {C.BOLD}{lbl[0]}: {C.CYAN}{selected['name']}{C.END}")
-            print(f"   {C.GREY}{'=' * 50}{C.END}\n")
-            print(f"   {C.BOLD}{lbl[1]}:{C.END} {details['desc']}")
-            print(f"   {C.BOLD}{lbl[2]}:{C.END} {details['launchpad']}")
-            print(f"   {C.BOLD}{lbl[3]}:{C.END} {details['lock']}")
-            print(f"   {C.BOLD}{'Status' if current_lang == 'en' else 'Durum'}:{C.END} {selected['status']}")
+            print(f"   {C.CYAN}{C.BOLD}{l[0]}: {selected['name'].upper()}{C.END}")
+            print(f"   {C.GREY}{'━' * 60}{C.END}")
 
-            print(f"\n   {C.GREY}{'=' * 50}{C.END}")
-            input(f"\n{ui['return_msg']}")
-        else:
-            if choice != "0":
-                print(f"\n   {C.FAIL}{ui['invalid']}{C.END}")
-                time.sleep(1)
+            # print formatted data rows
+            print(f"   {C.BOLD}{l[1]:<15}:{C.END} {details['desc']}")
+            print(f"   {C.BOLD}{l[2]:<15}:{C.END} {details['platform']}")
+            print(f"   {C.BOLD}{l[3]:<15}:{C.END} {details['lock']}")
+            print(f"   {C.BOLD}{l[4]:<15}:{C.END} {C.GREEN}{details['investors']}{C.END}")
+            print(f"   {C.BOLD}{l[5]:<15}:{C.END} {details['utility']}")
+
+            # risk color logic
+            r_val = details['risk']
+            r_color = C.FAIL if "High" in r_val or "Yüksek" in r_val else C.GREEN
+            print(f"   {C.BOLD}{l[6]:<15}:{C.END} {r_color}{r_val}{C.END}")
+
+            print(f"   {C.GREY}{'━' * 60}{C.END}")
+            input(f"\n   {ui['return_msg']}")

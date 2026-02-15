@@ -254,7 +254,7 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def show_on_chain(self, current_lang, user_label, base_path):
-        # performs mock on chain scan for selected coin
+        # prepare screen and display asset list for on chain analysis
         t_title = "ZİNCİR ÜSTÜ ANALİZ" if current_lang == "tr" else "ON-CHAIN ANALYSIS"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
@@ -267,14 +267,28 @@ class MarketController:
 
         if choice.isdigit() and 1 <= int(choice) <= len(assets):
             selected_asset = assets[int(choice) - 1]
-            print(f"\n   {C.WARNING}{ui['scan']}{C.END}")
+            target_symbol = selected_asset['symbol']
+
+            # clear screen and redraw header with asset symbol for focus
+            MenuV2.prepare_content_screen(base_path + [t_title, target_symbol], user_info=user_label)
+
+            # print localized selection details
+            selection_text = "Seçilen Varlık" if current_lang == "tr" else "Selected Asset"
+            print(f"   {C.BOLD}{selection_text}: {C.CYAN}{target_symbol} ({selected_asset['name']}){C.END}\n")
+
+            print(f"   {C.WARNING}{ui['scan']}{C.END}")
             time.sleep(1)
-            onchain_data = self.market_service.get_onchain_data(selected_asset['symbol'], current_lang)
-            MenuV2.draw_onchain_report(onchain_data)
+
+            # render on chain report with language support
+            onchain_data = self.market_service.get_onchain_data(target_symbol, current_lang)
+            MenuV2.draw_onchain_report(onchain_data, current_lang)
+
+            # handle return to menu
             input(f"{ui['return_msg']}")
         else:
-            if choice != "0": print(f"\n   {C.FAIL}{ui['invalid']}{C.END}")
-            time.sleep(0.5)
+            if choice != "0":
+                print(f"\n   {C.FAIL}{ui['invalid']}{C.END}")
+                time.sleep(0.5)
 
     def show_whale_alerts(self, current_lang, user_label, base_path):
         # display whale alerts with fixed manual alignment

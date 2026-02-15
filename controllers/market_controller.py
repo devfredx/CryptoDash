@@ -76,12 +76,13 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def view_listings(self, current_lang, user_label, base_path):
-        # displays new listings using manual spacing
+        # displays new asset listings with localized dates and manual alignment
         title = "YENİ LİSTELEMELER" if current_lang == "tr" else "NEW LISTINGS"
         MenuV2.prepare_content_screen(base_path + [title], user_info=user_label)
 
         ui = self._get_ui_strings(current_lang)
-        data = self.market_service.get_new_listings()
+        # request localized listing data from service
+        data = self.market_service.get_new_listings(current_lang)
 
         if current_lang == "tr":
             h_str = f"   {C.BOLD}{C.CYAN}{'SEMBOL':<10}{'İSİM':<18}{'FİYAT':<12}{'PERF':<12}{'TARİH':<15}{C.END}"
@@ -95,9 +96,14 @@ class MarketController:
             sym = f"{coin['symbol']:<10}"
             name = f"{coin['name']:<18}"
             price = f"${coin['price']:<12}"
+
+            # format performance string with color
             perf_val = f"{coin['change']}%"
             perf_str = f"{C.GREEN}{perf_val}{C.END}" + (" " * (12 - len(perf_val)))
+
+            # date is now localized by the service
             date = f"{coin['date']:<15}"
+
             print(f"   {sym}{name}{price}{perf_str}{date}")
 
         input(f"\n{ui['return_msg']}")
@@ -153,39 +159,45 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def view_fear_greed(self, current_lang, user_label, base_path):
-        # shows fear and greed index gauge and history
+        # shows fear and greed index gauge and history table
         t_title = "KORKU & AÇGÖZLÜLÜK ENDEKSİ" if current_lang == "tr" else "FEAR & GREED INDEX"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
         ui = self._get_ui_strings(current_lang)
         fng_data = self.market_service.get_fear_greed_data(current_lang)
 
-        # localize gauge prefix text
+        # define localized sentiment title for the gauge
         t_sentiment = "PİYASA DUYARLILIĞI" if current_lang == "tr" else "MARKET SENTIMENT"
         MenuV2.draw_gauge(fng_data["current_value"], fng_data["current_status"], title=t_sentiment)
 
-        # rest of the method remains the same
+        # print history table using manual alignment logic
         if current_lang == "tr":
-            headers = ["DÖNEM", "DEĞER", "DURUM"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'DÖNEM':<15}{'DEĞER':<20}{'DURUM':<25}{C.END}"
         else:
-            headers = ["PERIOD", "VALUE", "STATUS"]
+            h_str = f"   {C.BOLD}{C.CYAN}{'PERIOD':<15}{'VALUE':<20}{'STATUS':<25}{C.END}"
 
-        widths = [15, 20, 25]
-        table_rows = []
+        print(h_str)
+        print("   " + f"{C.GREY}{'-' * 60}{C.END}")
 
         for item in fng_data["history"]:
+            period = f"{item['period']:<15}"
+
+            # handle colored value column
             val = item['value']
             if val < 45:
-                val_str = f"{C.FAIL}{val}{C.END}"
+                color = C.FAIL
             elif val > 55:
-                val_str = f"{C.GREEN}{val}{C.END}"
+                color = C.GREEN
             else:
-                val_str = f"{C.CYAN}{val}{C.END}"
-            table_rows.append([item['period'], val_str, item['status']])
+                color = C.CYAN
 
-        MenuV2.draw_table(headers, table_rows, widths)
+            val_vis = str(val)
+            val_str = f"{color}{val_vis}{C.END}" + (" " * (20 - len(val_vis)))
+            status = f"{item['status']:<25}"
+
+            print(f"   {period}{val_str}{status}")
+
         input(f"\n{ui['return_msg']}")
-
     def show_chart(self, current_lang, user_label, base_path):
         # renders simple terminal chart for selected asset
         t_title = "TRADINGVIEW GRAFİK" if current_lang == "tr" else "TRADINGVIEW CHART"

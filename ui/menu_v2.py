@@ -127,7 +127,8 @@ class MenuV2:
         print("")
 
     @staticmethod
-    def draw_gauge(value, label, width=50):
+    def draw_gauge(value, label, title="MARKET SENTIMENT", width=50):
+        # calculate gauge color based on value
         color = C.GREY
         if value < 25:
             color = C.FAIL
@@ -141,7 +142,8 @@ class MenuV2:
         filled_len = int(width * value // 100)
         bar = '█' * filled_len + '-' * (width - filled_len)
 
-        print(f"\n   {C.BOLD}MARKET SENTIMENT: {color}{label.upper()}{C.END}")
+        # use the passed title instead of hardcoded string
+        print(f"\n   {C.BOLD}{title}: {color}{label.upper()}{C.END}")
         print(f"   {color}[{bar}] {value}/100{C.END}\n")
 
     @staticmethod

@@ -153,14 +153,18 @@ class MarketController:
         input(f"\n{ui['return_msg']}")
 
     def view_fear_greed(self, current_lang, user_label, base_path):
-        # shows fear and greed gauge with history table
+        # shows fear and greed index gauge and history
         t_title = "KORKU & AÇGÖZLÜLÜK ENDEKSİ" if current_lang == "tr" else "FEAR & GREED INDEX"
         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
 
         ui = self._get_ui_strings(current_lang)
         fng_data = self.market_service.get_fear_greed_data(current_lang)
-        MenuV2.draw_gauge(fng_data["current_value"], fng_data["current_status"])
 
+        # localize gauge prefix text
+        t_sentiment = "PİYASA DUYARLILIĞI" if current_lang == "tr" else "MARKET SENTIMENT"
+        MenuV2.draw_gauge(fng_data["current_value"], fng_data["current_status"], title=t_sentiment)
+
+        # rest of the method remains the same
         if current_lang == "tr":
             headers = ["DÖNEM", "DEĞER", "DURUM"]
         else:

@@ -230,13 +230,16 @@ class MenuV2:
         print("")
 
     @staticmethod
-    def draw_onchain_report(data):
+    def draw_onchain_report(data, lang="en"):
+        # render detailed on chain analysis report
         if not data: return
 
         lbl = data['labels']
         sym = data['symbol']
 
-        print(f"\n   {C.BOLD}ON-CHAIN ANALYSIS: {C.WARNING}{sym}{C.END}")
+        # define localized report header
+        header = "ZİNCİR ÜSTÜ ANALİZ" if lang == "tr" else "ON-CHAIN ANALYSIS"
+        print(f"\n   {C.BOLD}{header}: {C.WARNING}{sym}{C.END}")
         print(f"   {C.GREY}{'-' * 50}{C.END}")
 
         total_vol = data['inflow'] + data['outflow']

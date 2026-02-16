@@ -234,6 +234,14 @@ def main():
                             ["HOME", "CALENDARS"] if current_lang == "en" else ["ANASAYFA", "TAKVİMLER"]
                         )
 
+                    elif action == "show_unlocks":
+                        # route to token unlock calendar
+                        market_controller.show_token_unlocks(
+                            current_lang,
+                            user_label,
+                            ["HOME", "CALENDARS"] if current_lang == "en" else ["ANASAYFA", "TAKVİMLER"]
+                        )
+
                     else:
                         MenuV2.prepare_content_screen(base_path + [label], user_info=user_label)
                         print(f"\n[🚧] Feature '{label}' is under development")

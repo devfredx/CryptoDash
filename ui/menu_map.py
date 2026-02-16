@@ -135,7 +135,9 @@ def get_guest_menu_structure(lang="en"):
         "trade_ops": {
             "title": txt["m2_cats"][0].upper(),
             "options": {
-                "1": {"label": txt["to_items"][0], "action": "trade_swap"},
+                # DÜZELTME: "trade_swap" yerine "show_swap" yazıldı.
+                # Çünkü main.py dosyasında bu özellik "show_swap" olarak tanımlı.
+                "1": {"label": txt["to_items"][0], "action": "show_swap"},
                 "2": {"label": txt["to_items"][1], "action": "trade_spot"},
                 "3": {"label": txt["to_items"][2], "action": "trade_convert"},
                 "0": {"label": txt["back"], "action": "GO_BACK"}

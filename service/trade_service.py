@@ -28,3 +28,22 @@ class TradeService:
         }
 
         print("   [SYSTEM] TradeService Initialized with mock data.")
+
+    def _get_price(self, symbol: str) -> float:
+        """
+        Safely retrieve the price of an asset.
+        Returns 0.0 if asset not found to prevent crashes.
+        """
+        return self.rates.get(symbol, 0.0)
+
+    def validate_pair(self, source: str, target: str) -> bool:
+        """
+        Check if both assets exist in the system and are strictly different.
+        """
+        if source == target:
+            return False
+
+        if source not in self.rates or target not in self.rates:
+            return False
+
+        return True

@@ -1,54 +1,76 @@
-# main.py
-
+import sys
 import time
+import os
 
-# Legacy imports
+# --- UI IMPORTS ---
 from ui.menu import Menu
-from ui.strings import STRINGS
+from ui.menu_v2 import MenuV2
+from ui.menu_map import get_guest_menu_structure
+
+# --- REPOSITORY & AUTH IMPORTS ---
 from repository.user_repository import UserRepository
 from service.auth_service import AuthService
+
+# --- SERVICE IMPORTS ---
+# Legacy Services (Old Structure)
 from service.market_service import MarketService
 from service.wallet_service import WalletService
-from service.trade_service import TradeService
 from service.news_service import NewsService
 from service.support_service import SupportService
 
-# V2 imports
-from ui.menu_map import get_guest_menu_structure
-from ui.menu_v2 import MenuV2
+# New Architecture Services (Refactored)
+from service.trade_service import TradeService
 
-# Controllers
+# --- CONTROLLER IMPORTS ---
 from controllers.market_controller import MarketController
+from controllers.trade_controller import TradeController
 
 
 def main():
-    # Initialize services
+    # ---------------------------------------------------------
+    # 1. INITIALIZATION
+    # ---------------------------------------------------------
+
+    # Initialize Repositories and Auth
     user_repo = UserRepository()
     auth_service = AuthService(user_repo)
+
+    # Initialize Services
     market_service = MarketService()
     wallet_service = WalletService(market_service)
-    trade_service = TradeService(market_service, user_repo)
     news_service = NewsService()
     support_service = SupportService()
 
+    # Initialize New Trade Service (No arguments needed for new class)
+    trade_service = TradeService()
+
     # Initialize Controllers
+    # Market Controller needs MarketService
     market_controller = MarketController(market_service)
 
-    # App state
+    # Trade Controller needs TradeService (logic) and MarketService (data)
+    trade_controller = TradeController(trade_service, market_service)
+
+    # ---------------------------------------------------------
+    # 2. APPLICATION STATE
+    # ---------------------------------------------------------
     current_lang = "en"
     current_session = None
 
-    # Navigation state
+    # Navigation State Management
     nav_state = {
-        "mode": "dashboard",
-        "current_key": None
+        "mode": "dashboard",  # modes: 'dashboard', 'submenu'
+        "current_key": None  # stores which submenu is active
     }
 
+    # ---------------------------------------------------------
+    # 3. MAIN LOOP
+    # ---------------------------------------------------------
     while True:
-        s = STRINGS.get(current_lang, STRINGS["en"])
+        # Get dynamic menu structure based on language
         guest_mega_menu, guest_sub_menus = get_guest_menu_structure(current_lang)
 
-        # UI translation logic
+        # Define UI Strings (Localization)
         if current_lang == "tr":
             ui_home = "ANASAYFA"
             ui_guest = "Misafir"
@@ -68,13 +90,15 @@ def main():
             ui_goodbye = "Goodbye"
             ui_footer = "[Select Column: 1-6]"
 
-        # Determine user label
+        # Determine User Label
         user_label = current_session.username if current_session else ui_guest
 
-        # Check guest mode
+        # =====================================================
+        # MODE: GUEST
+        # =====================================================
         if current_session is None:
 
-            # Dashboard view
+            # --- VIEW: DASHBOARD ---
             if nav_state["mode"] == "dashboard":
                 MenuV2.draw_mega_dashboard(
                     guest_mega_menu,
@@ -92,22 +116,26 @@ def main():
                     nav_state["mode"] = "submenu"
 
                 elif choice == "Q":
-                    print(ui_goodbye)
+                    print(f"\n   {ui_goodbye}")
                     break
                 else:
-                    pass
+                    pass  # Invalid input, loop again
 
-            # Submenu view
+            # --- VIEW: SUBMENU ---
             elif nav_state["mode"] == "submenu":
                 current_key = nav_state["current_key"]
 
+                # Fallback if key is invalid
                 if current_key not in guest_sub_menus:
                     nav_state["mode"] = "dashboard"
                     continue
 
                 menu_data = guest_sub_menus[current_key]
+
+                # Define Breadcrumb Path
                 base_path = [ui_home, menu_data["title"]]
 
+                # Draw Submenu
                 MenuV2.draw_submenu(menu_data, base_path, user_info=user_label)
                 print(ui_select_sub)
                 sub_choice = input(ui_input_prefix).upper().strip()
@@ -117,19 +145,20 @@ def main():
                     action = selected_option.get("action")
                     label = selected_option.get("label")
 
-                    # --- CONTROLLER ROUTING LOGIC ---
+                    # -----------------------------------------
+                    # ACTION ROUTER
+                    # -----------------------------------------
 
-                    # Navigation logic
+                    # 1. Navigation Actions
                     if action and action.startswith("NAV_"):
                         nav_state["current_key"] = action.replace("NAV_", "").lower()
                         continue
 
-                    # Back logic
                     elif action == "GO_BACK":
                         nav_state["mode"] = "dashboard"
                         nav_state["current_key"] = None
 
-                    # Language settings
+                    # 2. Language Settings
                     elif action == "set_lang_en":
                         current_lang = "en"
                         print("\n✅ Language set to English")
@@ -144,40 +173,35 @@ def main():
                         nav_state["mode"] = "dashboard"
                         nav_state["current_key"] = None
 
-                    elif action in ["set_lang_de", "set_lang_es", "set_lang_ru", "set_lang_zh"]:
+                    elif str(action).startswith("set_lang_"):
                         MenuV2.prepare_content_screen(base_path + ["LANGUAGE"], user_info=user_label)
                         print(f"\n 🚧 {label} coming soon!")
                         input(f"\n{ui_return_msg}")
 
-                    # Auth logic
+                    # 3. Authentication Actions
                     elif action == "login":
                         t_title = "GİRİŞ" if current_lang == "tr" else "LOGIN"
                         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
-                        prompt_u = "Kullanıcı Adı: " if current_lang == "tr" else "Username: "
-                        prompt_p = "Şifre: " if current_lang == "tr" else "Password: "
-                        u_name = input(prompt_u)
-                        p_word = input(prompt_p)
+                        u_name = input("Username: ")
+                        p_word = input("Password: ")
                         user = auth_service.login(u_name, p_word)
                         if user:
                             current_session = user
-                            print(f"\n✅ Success")
                             nav_state["mode"] = "dashboard"
                         else:
-                            print(f"\n❌ Failed")
+                            print("\n❌ Failed")
                         input(f"\n{ui_return_msg}")
 
                     elif action == "register":
                         t_title = "KAYIT" if current_lang == "tr" else "REGISTER"
                         MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
-                        prompt_u = "Yeni Kullanıcı Adı: " if current_lang == "tr" else "New Username: "
-                        prompt_p = "Yeni Şifre: " if current_lang == "tr" else "New Password: "
-                        u_name = input(prompt_u)
-                        p_word = input(prompt_p)
+                        u_name = input("New Username: ")
+                        p_word = input("New Password: ")
                         success, msg = auth_service.register(u_name, p_word)
                         print(f"\n📢 {msg}")
                         input(f"\n{ui_return_msg}")
 
-                    # --- MARKET CONTROLLER DELEGATION ---
+                    # 4. Market Controller Actions
                     elif action == "view_prices":
                         market_controller.view_prices(current_lang, user_label, base_path)
 
@@ -196,23 +220,45 @@ def main():
                     elif action == "show_chart":
                         market_controller.show_chart(current_lang, user_label, base_path)
 
-                    elif "heatmap" in action.lower():
+                    elif "heatmap" in str(action).lower():
                         market_controller.show_heatmap(current_lang, user_label, base_path)
 
-                    elif "on_chain" in action.lower() or "onchain" in action.lower():
+                    elif "on_chain" in str(action).lower() or "onchain" in str(action).lower():
                         market_controller.show_on_chain(current_lang, user_label, base_path)
 
-                    elif "whale" in action.lower():
+                    elif "whale" in str(action).lower():
                         market_controller.show_whale_alerts(current_lang, user_label, base_path)
 
-                    elif "gas" in action.lower():
+                    elif "gas" in str(action).lower():
                         market_controller.show_gas_tracker(current_lang, user_label, base_path)
 
-
-                    elif "calendar" in action.lower():
+                    elif "calendar" in str(action).lower():
                         market_controller.view_economic_calendar(current_lang, user_label, base_path)
 
-                    # --- OTHER SERVICES ---
+                    # 5. Calendar Actions (ICO & Unlocks)
+                    elif action == "show_ico":
+                        market_controller.show_ico_calendar(
+                            current_lang,
+                            user_label,
+                            base_path + (["TAKVİMLER"] if current_lang == "tr" else ["CALENDARS"])
+                        )
+
+                    elif action == "show_unlocks":
+                        market_controller.show_token_unlocks(
+                            current_lang,
+                            user_label,
+                            base_path + (["TAKVİMLER"] if current_lang == "tr" else ["CALENDARS"])
+                        )
+
+                    # 6. Trade Actions (NEW: Swap)
+                    elif action == "show_swap":
+                        trade_controller.show_swap_tool(
+                            current_lang,
+                            user_label,
+                            base_path + (["AL-SAT"] if current_lang == "tr" else ["TRADE"])
+                        )
+
+                    # 7. Other Services (News, FAQ)
                     elif action == "news":
                         MenuV2.prepare_content_screen(base_path + ["NEWS"], user_info=user_label)
                         news = news_service.get_latest_news(current_lang)
@@ -225,46 +271,40 @@ def main():
                         Menu.show_support_page(content)
                         input(f"\n{ui_return_msg}")
 
-
-                    elif action == "show_ico":
-                        # call the newly created ico calendar method without 'self'
-                        market_controller.show_ico_calendar(
-                            current_lang,
-                            user_label,
-                            ["HOME", "CALENDARS"] if current_lang == "en" else ["ANASAYFA", "TAKVİMLER"]
-                        )
-
-                    elif action == "show_unlocks":
-                        # route to token unlock calendar
-                        market_controller.show_token_unlocks(
-                            current_lang,
-                            user_label,
-                            ["HOME", "CALENDARS"] if current_lang == "en" else ["ANASAYFA", "TAKVİMLER"]
-                        )
-
+                    # Default: Feature Under Construction
                     else:
-                        MenuV2.prepare_content_screen(base_path + [label], user_info=user_label)
+                        MenuV2.prepare_content_screen(base_path + [str(label)], user_info=user_label)
                         print(f"\n[🚧] Feature '{label}' is under development")
                         input(f"\n{ui_return_msg}")
 
                 else:
+                    # Invalid submenu choice
                     pass
 
-        # Member mode logic
+        # =====================================================
+        # MODE: MEMBER (Simplified for Demo)
+        # =====================================================
         else:
             Menu.draw_member_dashboard(current_lang, current_session)
             choice = input("Select: ").upper()
+
             if choice == "O":
                 current_session = None
                 nav_state["mode"] = "dashboard"
+
             elif choice == "1":
                 MenuV2.prepare_content_screen(["MEMBER", "MARKETS"], user_info=user_label)
                 all_assets = market_service.get_all_assets()
                 Menu.show_market_table(all_assets)
                 input("\nEnter...")
+
             else:
                 print("Option not available in demo")
                 time.sleep(1)
 
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\n   Stopped by user.")

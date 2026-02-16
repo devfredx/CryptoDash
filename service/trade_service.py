@@ -47,3 +47,50 @@ class TradeService:
             return False
 
         return True
+
+    def get_swap_quote(self, source_sym: str, target_sym: str, amount: float) -> Dict[str, Any]:
+        """
+        Calculate the estimated swap output, exchange rate, and fees.
+
+        Args:
+            source_sym: Symbol of the asset being sold (e.g. 'BTC')
+            target_sym: Symbol of the asset being bought (e.g. 'USDT')
+            amount: Amount of source asset to swap
+
+        Returns:
+            Dictionary containing rate, fee, output amount, and fee percentage.
+        """
+        # Step 1: Validate input
+        if not self.validate_pair(source_sym, target_sym):
+            return {"error": "Invalid Pair"}
+
+        if amount <= 0:
+            return {"error": "Invalid Amount"}
+
+        # Step 2: Get Prices
+        src_price = self._get_price(source_sym)
+        dst_price = self._get_price(target_sym)
+
+        # Step 3: Calculate Exchange Rate (Source / Target)
+        # Example: 1 BTC ($52000) -> ? ETH ($3000) = 17.33 ratio
+        raw_rate = src_price / dst_price
+
+        # Step 4: Calculate Output before Fees
+        gross_output_amount = amount * raw_rate
+
+        # Step 5: Calculate and Deduct Fee
+        # Fee is taken from the OUTPUT asset in this model
+        fee_rate = self.fee_config['swap']
+        fee_amount = gross_output_amount * fee_rate
+
+        net_output = gross_output_amount - fee_amount
+
+        # Return structured data for the Controller
+        return {
+            "rate": raw_rate,
+            "fee": fee_amount,
+            "output": net_output,
+            "fee_pct": f"{fee_rate * 100:.2f}%",
+            "src_usd": src_price,
+            "dst_usd": dst_price
+        }

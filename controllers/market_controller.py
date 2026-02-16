@@ -473,3 +473,61 @@ class MarketController:
 
             print(f"   {C.GREY}{'━' * 60}{C.END}")
             input(f"\n   {ui['return_msg']}")
+
+    def show_token_unlocks(self, current_lang, user_label, base_path):
+        # prepare screen and fetch unlock data
+        t_title = "TOKEN KİLİT AÇILIMLARI" if current_lang == "tr" else "TOKEN UNLOCKS"
+        MenuV2.prepare_content_screen(base_path + [t_title], user_info=user_label)
+
+        ui = self._get_ui_strings(current_lang)
+        data = self.market_service.get_unlock_list(current_lang)
+
+        # print header with manual alignment
+        if current_lang == "tr":
+            h_str = f"   {C.BOLD}{C.CYAN}{'#':<4}{'VARLIK':<12}{'TARİH':<15}{'MİKTAR':<12}{'DEĞER':<12}{'ORAN':<8}{C.END}"
+        else:
+            h_str = f"   {C.BOLD}{C.CYAN}{'#':<4}{'ASSET':<12}{'DATE':<15}{'AMOUNT':<12}{'VALUE':<12}{'RATIO':<8}{C.END}"
+
+        print(h_str)
+        print("   " + f"{C.GREY}{'-' * 65}{C.END}")
+
+        # render list of unlock events
+        for item in data:
+            idx = f"{item['id']:<4}"
+            asset = f"{C.BOLD}{item['symbol']:<12}{C.END}"
+            date = f"{item['date']:<15}"
+            amount = f"{item['amount']:<12}"
+            val = f"{C.CYAN}{item['value']:<12}{C.END}"
+
+            # highlight ratio if it's high impact
+            ratio_val = item['ratio']
+            r_color = C.FAIL if float(ratio_val.replace('%', '')) > 2.0 else C.GREY
+            ratio_str = f"{r_color}{ratio_val:<8}{C.END}"
+
+            print(f"   {idx}{asset}{date}{amount}{val}{ratio_str}")
+
+        print(f"\n   [{C.FAIL}0{C.END}] " + ("Geri" if current_lang == "tr" else "Back"))
+        print(f"\n{ui['input_prefix']}{ui['select_asset']}", end="")
+        choice = input().strip()
+
+        if choice.isdigit() and 1 <= int(choice) <= len(data):
+            selected = data[int(choice) - 1]
+            details = self.market_service.get_unlock_details(selected['id'], current_lang)
+
+            # clear screen for distribution report
+            MenuV2.prepare_content_screen(base_path + [t_title, selected['symbol']], user_info=user_label)
+
+            head = "DAĞITIM DETAYLARI" if current_lang == "tr" else "DISTRIBUTION DETAILS"
+            print(f"   {C.BOLD}{head}: {C.CYAN}{selected['name']} ({selected['symbol']}){C.END}")
+            print(f"   {C.GREY}{'━' * 55}{C.END}\n")
+
+            # render simple bar chart for allocations
+            for row in details["breakdown"]:
+                label = f"{row['label']:<20}"
+                pct = row['val']
+                bar_len = int(float(pct.replace('%', '')) / 100 * 30)
+                bar = f"{C.GREEN}{'█' * bar_len}{C.GREY}{'░' * (30 - bar_len)}{C.END}"
+                print(f"   {label} {bar} {C.BOLD}{pct}{C.END}")
+
+            print(f"\n   {C.GREY}{'━' * 55}{C.END}")
+            input(f"\n   {ui['return_msg']}")

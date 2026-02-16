@@ -347,3 +347,92 @@ class MarketService:
         }
 
         return details.get(project_id, {"en": default_data["en"], "tr": default_data["tr"]})[lang]
+
+    def get_unlock_list(self, lang="en"):
+        # return a full list of 12 token unlock events for consistency
+        if lang == "tr":
+            return [
+                {"id": 1, "symbol": "ARB", "name": "Arbitrum", "date": "22 Şub 2026", "amount": "92.6M",
+                 "value": "$112M", "ratio": "1.1%"},
+                {"id": 2, "symbol": "SOL", "name": "Solana", "date": "01 Mar 2026", "amount": "1.2M", "value": "$145M",
+                 "ratio": "0.3%"},
+                {"id": 3, "symbol": "OP", "name": "Optimism", "date": "15 Mar 2026", "amount": "31.4M", "value": "$88M",
+                 "ratio": "2.8%"},
+                {"id": 4, "symbol": "SUI", "name": "Sui", "date": "03 Nis 2026", "amount": "65M", "value": "$95M",
+                 "ratio": "4.2%"},
+                {"id": 5, "symbol": "DYX", "name": "dYdX", "date": "12 Nis 2026", "amount": "2.1M", "value": "$6.4M",
+                 "ratio": "0.8%"},
+                {"id": 6, "symbol": "APT", "name": "Aptos", "date": "18 Nis 2026", "amount": "11.3M", "value": "$102M",
+                 "ratio": "2.5%"},
+                {"id": 7, "symbol": "IMX", "name": "Immutable", "date": "25 Nis 2026", "amount": "25.5M",
+                 "value": "$58M", "ratio": "1.9%"},
+                {"id": 8, "symbol": "TIA", "name": "Celestia", "date": "30 Nis 2026", "amount": "1.1M", "value": "$12M",
+                 "ratio": "0.5%"},
+                {"id": 9, "symbol": "STRK", "name": "Starknet", "date": "05 May 2026", "amount": "64M",
+                 "value": "$134M", "ratio": "3.1%"},
+                {"id": 10, "symbol": "SEI", "name": "Sei Network", "date": "15 May 2026", "amount": "125M",
+                 "value": "$82M", "ratio": "5.4%"},
+                {"id": 11, "symbol": "W", "name": "Wormhole", "date": "22 May 2026", "amount": "18M", "value": "$11M",
+                 "ratio": "1.0%"},
+                {"id": 12, "symbol": "ZETA", "name": "ZetaChain", "date": "28 May 2026", "amount": "5.2M",
+                 "value": "$8M", "ratio": "2.2%"}
+            ]
+        return [
+            {"id": 1, "symbol": "ARB", "name": "Arbitrum", "date": "Feb 22, 2026", "amount": "92.6M", "value": "$112M",
+             "ratio": "1.1%"},
+            {"id": 2, "symbol": "SOL", "name": "Solana", "date": "Mar 01, 2026", "amount": "1.2M", "value": "$145M",
+             "ratio": "0.3%"},
+            {"id": 3, "symbol": "OP", "name": "Optimism", "date": "Mar 15, 2026", "amount": "31.4M", "value": "$88M",
+             "ratio": "2.8%"},
+            {"id": 4, "symbol": "SUI", "name": "Sui", "date": "Apr 03, 2026", "amount": "65M", "value": "$95M",
+             "ratio": "4.2%"},
+            {"id": 5, "symbol": "DYX", "name": "dYdX", "date": "Apr 12, 2026", "amount": "2.1M", "value": "$6.4M",
+             "ratio": "0.8%"},
+            {"id": 6, "symbol": "APT", "name": "Aptos", "date": "Apr 18, 2026", "amount": "11.3M", "value": "$102M",
+             "ratio": "2.5%"},
+            {"id": 7, "symbol": "IMX", "name": "Immutable", "date": "Apr 25, 2026", "amount": "25.5M", "value": "$58M",
+             "ratio": "1.9%"},
+            {"id": 8, "symbol": "TIA", "name": "Celestia", "date": "Apr 30, 2026", "amount": "1.1M", "value": "$12M",
+             "ratio": "0.5%"},
+            {"id": 9, "symbol": "STRK", "name": "Starknet", "date": "May 05, 2026", "amount": "64M", "value": "$134M",
+             "ratio": "3.1%"},
+            {"id": 10, "symbol": "SEI", "name": "Sei Network", "date": "May 15, 2026", "amount": "125M",
+             "value": "$82M", "ratio": "5.4%"},
+            {"id": 11, "symbol": "W", "name": "Wormhole", "date": "May 22, 2026", "amount": "18M", "value": "$11M",
+             "ratio": "1.0%"},
+            {"id": 12, "symbol": "ZETA", "name": "ZetaChain", "date": "May 28, 2026", "amount": "5.2M", "value": "$8M",
+             "ratio": "2.2%"}
+        ]
+
+    def get_unlock_details(self, project_id, lang="en"):
+        # return specific allocation breakdown for all 12 projects
+        data = {
+            1: {"team": "40%", "investors": "35%", "eco": "25%"},  # ARB
+            2: {"team": "10%", "investors": "10%", "eco": "80%"},  # SOL
+            3: {"team": "25%", "investors": "25%", "eco": "50%"},  # OP
+            4: {"team": "30%", "investors": "40%", "eco": "30%"},  # SUI
+            5: {"team": "20%", "investors": "50%", "eco": "30%"},  # DYX
+            6: {"team": "35%", "investors": "35%", "eco": "30%"},  # APT
+            7: {"team": "25%", "investors": "20%", "eco": "55%"},  # IMX
+            8: {"team": "20%", "investors": "30%", "eco": "50%"},  # TIA
+            9: {"team": "30%", "investors": "30%", "eco": "40%"},  # STRK
+            10: {"team": "20%", "investors": "20%", "eco": "60%"},  # SEI
+            11: {"team": "15%", "investors": "15%", "eco": "70%"},  # W
+            12: {"team": "25%", "investors": "35%", "eco": "40%"}  # ZETA
+        }
+
+        # fallback to neutral distribution if ID not found
+        res = data.get(project_id, {"team": "33%", "investors": "33%", "eco": "34%"})
+
+        labels = {
+            "en": {"t": "Team/Advisors", "i": "Investors", "e": "Ecosystem/Rewards"},
+            "tr": {"t": "Ekip/Danışmanlar", "i": "Yatırımcılar", "e": "Ekosistem/Ödüller"}
+        }[lang]
+
+        return {
+            "breakdown": [
+                {"label": labels["t"], "val": res["team"]},
+                {"label": labels["i"], "val": res["investors"]},
+                {"label": labels["e"], "val": res["eco"]}
+            ]
+        }
